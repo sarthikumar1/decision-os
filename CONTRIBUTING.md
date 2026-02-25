@@ -21,6 +21,20 @@ npm run typecheck # Check TypeScript types
 npm run build     # Production build
 ```
 
+### Visual Regression Testing
+
+Visual regression tests use Playwright's built-in `toHaveScreenshot()` API. Baselines are stored in `e2e/visual.spec.ts-snapshots/`.
+
+```bash
+# Generate or update baseline screenshots (run after intentional UI changes)
+npx playwright test e2e/visual.spec.ts --update-snapshots --project=chromium
+
+# Run visual regression comparison
+npx playwright test e2e/visual.spec.ts --project=chromium
+```
+
+**When visual tests fail**, Playwright generates diff images in `test-results/` showing exactly what changed. Review the diff before updating baselines.
+
 ## Code Standards
 
 - **TypeScript** — strict mode, no `any` types unless justified
