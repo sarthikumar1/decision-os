@@ -1,0 +1,282 @@
+/**
+ * Results view — ranked options, breakdown, top drivers, export/share.
+ */
+
+"use client";
+
+import { useDecision } from "./DecisionProvider";
+import { Download, Link, Trophy, TrendingUp, BarChart3 } from "lucide-react";
+import { useState } from "react";
+import { encodeDecisionToUrl } from "@/lib/utils";
+import { normalizeWeights } from "@/lib/scoring";
+
+export function ResultsView() {
+  const { decision, results } = useDecision();
+  const [shareStatus, setShareStatus] = useState<string>("");
+
+  if (results.optionResults.length === 0) {
+    return (
+      <div className="rounded-lg border border-gray-200 bg-gray-50 p-6 text-center text-gray-500">
+        <BarChart3 className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+        <p>Add at least 2 options and 1 criterion to see results.</p>
+      </div>
+    );
+  }
+
+  const maxScore = Math.max(...results.optionResults.map((r) => r.totalScore));
+
+  const handleExportJson = () => {
+    const data = {
+      decision,
+      results: results.optionResults.map((r) => ({
+        option: r.optionName,
+        rank: r.rank,
+        totalScore: r.totalScore,
+        breakdown: r.criterionScores.map((cs) => ({
+          criterion: cs.criterionName,
+          rawScore: cs.rawScore,
+          effectiveScore: cs.effectiveScore,
+          weight: cs.normalizedWeight,
+          type: cs.criterionType,
+        })),
+      })),
+      exportedAt: new Date().toISOString(),
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `decision-os-${decision.title.replace(/\s+/g, "-").toLowerCase()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleShareLink = async () => {
+    try {
+      const encoded = encodeDecisionToUrl(decision);
+      const url = `${window.location.origin}${window.location.pathname}#data=${encoded}`;
+      if (url.length > 4000) {
+        setShareStatus("Decision too large for URL sharing. Use JSON export instead.");
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      setShareStatus("Link copied to clipboard!");
+      setTimeout(() => setShareStatus(""), 3000);
+    } catch {
+      setShareStatus("Failed to copy link.");
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Ranking */}
+      <section aria-labelledby="ranking-heading">
+        <div className="flex items-center justify-between mb-3">
+          <h2 id="ranking-heading" className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <Trophy className="h-5 w-5 text-yellow-500" />
+            Rankings
+          </h2>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleExportJson}
+              className="inline-flex items-center gap-1 rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+              aria-label="Export results as JSON"
+            >
+              <Download className="h-4 w-4" />
+              <span className="hidden sm:inline">Export JSON</span>
+            </button>
+            <button
+              onClick={handleShareLink}
+              className="inline-flex items-center gap-1 rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+              aria-label="Copy share link"
+            >
+              <Link className="h-4 w-4" />
+              <span className="hidden sm:inline">Share</span>
+            </button>
+          </div>
+        </div>
+
+        {shareStatus && (
+          <div className={`text-sm mb-3 px-3 py-2 rounded-md ${shareStatus.includes("copied") ? "bg-green-50 text-green-700" : "bg-yellow-50 text-yellow-700"}`}
+            role="status"
+          >
+            {shareStatus}
+          </div>
+        )}
+
+        <div className="space-y-3">
+          {results.optionResults.map((r, index) => {
+            const barWidth = maxScore > 0 ? (r.totalScore / maxScore) * 100 : 0;
+            const isWinner = index === 0;
+
+            return (
+              <div
+                key={r.optionId}
+                className={`rounded-lg border p-4 ${
+                  isWinner
+                    ? "border-blue-200 bg-blue-50"
+                    : "border-gray-200 bg-white"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`inline-flex h-7 w-7 items-center justify-center rounded-full text-sm font-bold ${
+                        isWinner
+                          ? "bg-blue-600 text-white"
+                          : "bg-gray-200 text-gray-600"
+                      }`}
+                    >
+                      {r.rank}
+                    </span>
+                    <span className="font-medium text-gray-900">{r.optionName}</span>
+                    {isWinner && (
+                      <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
+                        Winner
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-lg font-bold text-gray-900">
+                    {r.totalScore.toFixed(2)}
+                  </span>
+                </div>
+
+                {/* Score bar */}
+                <div className="h-2 w-full rounded-full bg-gray-100 overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${
+                      isWinner ? "bg-blue-600" : "bg-gray-400"
+                    }`}
+                    style={{ width: `${barWidth}%` }}
+                    role="progressbar"
+                    aria-valuenow={r.totalScore}
+                    aria-valuemin={0}
+                    aria-valuemax={10}
+                    aria-label={`${r.optionName}: ${r.totalScore.toFixed(2)}`}
+                  />
+                </div>
+
+                {/* Criterion breakdown */}
+                <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {r.criterionScores.map((cs) => (
+                    <div
+                      key={cs.criterionId}
+                      className="text-xs text-gray-600 flex items-center justify-between bg-gray-50 rounded px-2 py-1"
+                    >
+                      <span className="truncate mr-1">{cs.criterionName}</span>
+                      <span className="font-medium text-gray-900">
+                        {cs.effectiveScore.toFixed(2)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Top Drivers */}
+      <section aria-labelledby="drivers-heading">
+        <h2 id="drivers-heading" className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-3">
+          <TrendingUp className="h-5 w-5 text-green-600" />
+          Top Drivers
+        </h2>
+        <div className="rounded-lg border border-gray-200 bg-white">
+          {results.topDrivers.map((driver, index) => {
+            const pct = (driver.normalizedWeight * 100).toFixed(1);
+            return (
+              <div
+                key={driver.criterionId}
+                className={`flex items-center justify-between p-3 ${
+                  index < results.topDrivers.length - 1 ? "border-b border-gray-100" : ""
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-gray-900">{driver.criterionName}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-32 h-2 rounded-full bg-gray-100 overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-green-500"
+                      style={{ width: `${driver.normalizedWeight * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-sm font-medium text-gray-700 w-12 text-right">
+                    {pct}%
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Explain Results */}
+      <section aria-labelledby="explain-heading">
+        <h2 id="explain-heading" className="text-lg font-semibold text-gray-900 mb-3">
+          Explain This Result
+        </h2>
+        <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700 space-y-2">
+          <p>
+            <strong>How scoring works:</strong> Each criterion&apos;s raw weight is
+            normalized so all weights sum to 100%. For each option, scores (0–10)
+            are multiplied by the normalized weight. Cost criteria are inverted
+            (10 − score) so lower costs yield higher effective scores.
+          </p>
+          {results.optionResults.length > 0 && (
+            <p>
+              <strong>Winner:</strong>{" "}
+              <span className="text-blue-700 font-medium">
+                {results.optionResults[0].optionName}
+              </span>{" "}
+              scored {results.optionResults[0].totalScore.toFixed(2)} out of a
+              maximum of 10.00.
+              {results.optionResults.length > 1 && (
+                <>
+                  {" "}The margin over #{2} (
+                  {results.optionResults[1].optionName}) is{" "}
+                  {(
+                    results.optionResults[0].totalScore -
+                    results.optionResults[1].totalScore
+                  ).toFixed(2)}{" "}
+                  points.
+                </>
+              )}
+            </p>
+          )}
+          <p>
+            <strong>Top driver:</strong>{" "}
+            {results.topDrivers.length > 0
+              ? results.topDrivers[0].impactDescription
+              : "N/A"}
+          </p>
+          <NormalizedWeightsTable />
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function NormalizedWeightsTable() {
+  const { decision } = useDecision();
+  const nw = normalizeWeights(decision.criteria.map((c) => c.weight));
+
+  return (
+    <div className="mt-2">
+      <p className="font-medium text-gray-900 mb-1">Normalized Weights:</p>
+      <div className="flex flex-wrap gap-2">
+        {decision.criteria.map((c, i) => (
+          <span
+            key={c.id}
+            className="inline-flex items-center gap-1 rounded bg-gray-100 px-2 py-1 text-xs"
+          >
+            {c.name}: <strong>{(nw[i] * 100).toFixed(1)}%</strong>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
