@@ -1,10 +1,12 @@
 <div align="center">
 
-# 🎯 Decision OS
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/banner.svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/banner.svg">
+  <img alt="Decision OS — Structured decision-making for humans who think clearly" src="docs/banner.png" width="100%">
+</picture>
 
-**A structured decision-making tool for humans who think clearly.**
-
-Define options. Set criteria with weights. Score. See rankings, breakdowns, and sensitivity analysis — all in your browser.
+<br/>
 
 [![CI](https://github.com/ericsocrat/decision-os/actions/workflows/ci.yml/badge.svg)](https://github.com/ericsocrat/decision-os/actions)
 [![Deploy](https://img.shields.io/badge/Vercel-deployed-brightgreen?logo=vercel)](https://decision-os-hazel.vercel.app)

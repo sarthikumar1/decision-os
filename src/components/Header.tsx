@@ -25,9 +25,11 @@ export function Header() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white font-bold text-sm">
-              D
-            </div>
+            <img
+              src="/logo.svg"
+              alt="Decision OS logo"
+              className="h-9 w-9 rounded-lg"
+            />
             <div>
               <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                 Decision OS

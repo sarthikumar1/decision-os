@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+  </defs>
+  <!-- Rounded square background -->
+  <rect x="32" y="32" width="448" height="448" rx="96" fill="url(#bg)"/>
+  <!-- Decision diamond — the core symbol -->
+  <path d="M256 120 L368 256 L256 392 L144 256 Z" fill="none" stroke="white" stroke-width="28" stroke-linejoin="round" opacity="0.95"/>
+  <!-- Three horizontal bars inside — representing ranked options/scores -->
+  <rect x="200" y="222" width="112" height="18" rx="9" fill="white" opacity="0.95"/>
+  <rect x="212" y="252" width="88" height="18" rx="9" fill="white" opacity="0.6"/>
+  <rect x="224" y="282" width="64" height="18" rx="9" fill="white" opacity="0.35"/>
+</svg>
