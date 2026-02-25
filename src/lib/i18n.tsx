@@ -25,6 +25,7 @@ const en = {
     builder: "Builder",
     results: "Results",
     sensitivity: "Sensitivity",
+    compare: "Compare",
   },
   builder: {
     titlePlaceholder: "Decision title",

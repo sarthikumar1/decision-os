@@ -13,10 +13,19 @@ import { Header } from "@/components/Header";
 import { DecisionBuilder } from "@/components/DecisionBuilder";
 import { ResultsView } from "@/components/ResultsView";
 import { SensitivityView } from "@/components/SensitivityView";
+import { CompareView } from "@/components/CompareView";
 import { DecisionSkeleton } from "@/components/DecisionSkeleton";
 import { ImportModal } from "@/components/ImportModal";
 import { useValidation } from "@/hooks/useValidation";
-import { Settings2, BarChart3, Activity, Keyboard, X, Upload } from "lucide-react";
+import {
+  Settings2,
+  BarChart3,
+  Activity,
+  GitCompareArrows,
+  Keyboard,
+  X,
+  Upload,
+} from "lucide-react";
 import { ToastProvider, showToast } from "@/components/Toast";
 import { validateFile, readFileAsText, importFromJson } from "@/lib/import";
 import { saveDecision } from "@/lib/storage";
@@ -31,15 +40,16 @@ function useIsMounted() {
   );
 }
 
-type Tab = "builder" | "results" | "sensitivity";
+type Tab = "builder" | "results" | "sensitivity" | "compare";
 
 const tabLabels: Record<Tab, string> = {
   builder: "Builder",
   results: "Results",
   sensitivity: "Sensitivity",
+  compare: "Compare",
 };
 
-const TAB_IDS: Tab[] = ["builder", "results", "sensitivity"];
+const TAB_IDS: Tab[] = ["builder", "results", "sensitivity", "compare"];
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState<Tab>("builder");
@@ -111,7 +121,7 @@ function AppContent() {
         showToast({ text: "Failed to read file." });
       }
     },
-    [loadDecision],
+    [loadDecision]
   );
 
   useEffect(() => {
@@ -202,6 +212,10 @@ function AppContent() {
           setActiveTab("sensitivity");
           announce("Sensitivity tab");
           break;
+        case "4":
+          setActiveTab("compare");
+          announce("Compare tab");
+          break;
         case "?":
           setShowShortcuts((prev) => !prev);
           break;
@@ -256,6 +270,11 @@ function AppContent() {
       id: "sensitivity",
       label: "Sensitivity",
       icon: <Activity className="h-4 w-4" />,
+    },
+    {
+      id: "compare",
+      label: "Compare",
+      icon: <GitCompareArrows className="h-4 w-4" />,
     },
   ];
 
@@ -335,6 +354,14 @@ function AppContent() {
         >
           <SensitivityView />
         </div>
+        <div
+          id="panel-compare"
+          role="tabpanel"
+          aria-labelledby="tab-compare"
+          className={activeTab === "compare" ? "" : "hidden"}
+        >
+          <CompareView />
+        </div>
       </main>
 
       {/* Footer */}
@@ -386,6 +413,7 @@ function AppContent() {
                 ["1", "Builder tab"],
                 ["2", "Results tab"],
                 ["3", "Sensitivity tab"],
+                ["4", "Compare tab"],
                 ["←/→", "Navigate tabs"],
                 ["Home/End", "First/last tab"],
                 ["Ctrl+Z", "Undo"],

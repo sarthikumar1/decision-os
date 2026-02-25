@@ -42,6 +42,7 @@ Decision OS is a client-side web application built with Next.js (App Router) and
 | `utils.ts`          | Utilities (ID generation, URL encoding/decoding, relative time)       |
 | `templates.ts`      | 8 pre-built decision templates with `instantiateTemplate()` factory   |
 | `import.ts`         | JSON/CSV import parsing, preview, validation, and file reading        |
+| `comparison.ts`     | Decision comparison engine (deltas, agreement score, heatmap)         |
 | `error-reporter.ts` | Production error telemetry with localStorage + Sentry forwarding      |
 
 ### `/src/components/` — React UI Components
@@ -61,6 +62,7 @@ Decision OS is a client-side web application built with Next.js (App Router) and
 | `Toast.tsx`            | Imperative toast notifications with auto-dismiss and undo actions           |
 | `TemplatePicker.tsx`   | Modal template picker with focus trap and card grid                         |
 | `ImportModal.tsx`      | File import dialog with CSV preview, drag-and-drop support                  |
+| `CompareView.tsx`      | Side-by-side decision comparison with divergence analysis                   |
 
 ### `/src/hooks/` — Custom React Hooks
 

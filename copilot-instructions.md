@@ -44,6 +44,7 @@ src/
 │   ├── DecisionBuilder.tsx   # Decision editor UI
 │   ├── Header.tsx            # App header (branding, selector, dark toggle, import)
 │   ├── ImportModal.tsx       # JSON/CSV import with preview and drag-and-drop
+│   ├── CompareView.tsx       # Side-by-side decision comparison with divergence analysis
 │   ├── ResultsView.tsx       # Rankings, chart, export, share
 │   ├── SensitivityView.tsx   # Sensitivity analysis
 │   ├── ScoreChart.tsx        # Recharts visualization
@@ -63,14 +64,16 @@ src/
 │   ├── utils.ts      # Utilities
 │   ├── templates.ts  # 8 pre-built decision templates
 │   ├── import.ts     # JSON/CSV import parsing and validation
+│   ├── comparison.ts # Decision comparison engine (deltas, agreement, heatmap)
 │   └── error-reporter.ts  # Production error telemetry
-└── __tests__/        # Unit tests (165 tests, 13 files)
+└── __tests__/        # Unit tests (198 tests, 14 files)
     ├── scoring.test.ts
     ├── validation.test.ts
     ├── utils.test.ts
     ├── storage.test.ts
     ├── templates.test.ts
     ├── import.test.ts        # Import module tests (30 tests)
+    ├── comparison.test.ts    # Comparison engine tests (33 tests)
     ├── error-reporter.test.ts  # Error reporter tests (9 tests)
     ├── test-utils.tsx        # renderWithProviders helper
     └── components/           # Component integration tests
@@ -177,6 +180,14 @@ Everything in `src/lib/` must be pure functions with no React dependencies. This
 - Only Chromium project runs visual tests (cross-browser diffs are expected)
 - Generate baselines: `npx playwright test e2e/visual.spec.ts --update-snapshots`
 - Use `maxDiffPixelRatio: 0.01` (1%) for most tests, 0.02 for mobile/empty
+
+### 13. Comparison mode
+
+- Comparison engine is in `src/lib/comparison.ts` — pure functions, no React
+- Options/criteria matched by **name** (case-insensitive, trimmed)
+- Agreement score uses Spearman's rank correlation mapped to 0–1
+- Divergence colors: green (|Δ| ≤ 1), yellow (|Δ| 2–3), red (|Δ| ≥ 4)
+- Compare tab is the 4th tab (keyboard shortcut: `4`)
 
 ## Code Style
 

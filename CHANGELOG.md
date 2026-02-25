@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Decision Comparison Mode**: Side-by-side decision comparison with divergence analysis. 4th tab ("Compare") with dual selector dropdowns, agreement score (Spearman's rank correlation), side-by-side rankings with rank/score deltas, divergence heatmap with green/yellow/red severity, weight comparison table. Pure comparison engine in `comparison.ts`. 33 comparison unit tests (#12)
 - **JSON/CSV Import**: Import decisions from JSON files (full Decision or results export format) and CSV spreadsheets with preview step. File picker + drag-and-drop support. Lightweight CSV parser (no dependencies). 30 import unit tests. Import button in Header toolbar (#11)
 - **Error Telemetry**: Production error reporter with localStorage diagnostics (max 20 errors, FIFO). Sentry forwarding wired (activates when @sentry/nextjs is loaded). ErrorBoundary now reports via `reportError()`. No PII captured. 9 error reporter unit tests (#40)
 - **Visual Regression Testing**: Playwright visual comparison tests (7 screenshot tests: builder, results, sensitivity, dark mode, empty state, mobile, import modal). Uses `toHaveScreenshot()` with 1-2% tolerance. Only Chromium for consistent rendering. Snapshot workflow documented in CONTRIBUTING.md (#46)

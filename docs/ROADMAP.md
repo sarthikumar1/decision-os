@@ -43,7 +43,7 @@
 - [x] Lighthouse CI with performance/accessibility thresholds
 - [x] Decision templates (8 templates: career, purchase, hiring, etc.)
 - [x] Undo/redo support (50-entry history, Ctrl+Z/Ctrl+Shift+Z, toolbar buttons)
-- [x] Component test suite (165 tests across 13 files)
+- [x] Component test suite (198 tests across 14 files)
 - [x] JSON/CSV import with preview and drag-and-drop
 - [x] Production error telemetry (localStorage diagnostics, Sentry-ready)
 - [x] Visual regression testing (Playwright screenshots, 7 visual tests)
@@ -65,7 +65,7 @@
 - [ ] "What-if" scenarios (compare two weight configurations)
 - [ ] Decision journal (track outcomes over time)
 - [ ] PDF export
-- [ ] Comparison mode (side-by-side decisions)
+- [x] Comparison mode (side-by-side decisions)
 
 ## v1.0.0 — Production Ready
 
