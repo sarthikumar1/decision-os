@@ -1,14 +1,15 @@
 /**
  * Error Boundary — catches React render errors and shows a recovery UI.
  *
- * Logs errors to console in development. Provides a "Try Again" button
- * that resets the error state.
+ * Reports errors via the error-reporter module for production telemetry.
+ * Provides a "Try Again" button that resets the error state.
  */
 
 "use client";
 
 import { Component, type ReactNode, type ErrorInfo } from "react";
 import { AlertTriangle, RotateCcw } from "lucide-react";
+import { reportError } from "@/lib/error-reporter";
 
 interface Props {
   children: ReactNode;
@@ -31,9 +32,10 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    if (process.env.NODE_ENV === "development") {
-      console.error("ErrorBoundary caught:", error, errorInfo);
-    }
+    reportError(error, {
+      source: "ErrorBoundary",
+      componentStack: errorInfo.componentStack ?? undefined,
+    });
   }
 
   handleReset = () => {
