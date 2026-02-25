@@ -1,12 +1,24 @@
 # CODEOWNERS — auto-assigns reviewers on PRs.
+
 # See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 
 # Default owner for everything in the repo
-* @ericsocrat
 
-# Scoring engine requires careful review
-src/lib/scoring.ts @ericsocrat
-src/__tests__/scoring.test.ts @ericsocrat
+- @ericsocrat
 
-# CI/CD changes
+# CI/CD and infrastructure — critical path
+
 .github/ @ericsocrat
+
+# Scoring engine — deterministic logic, requires careful review
+
+src/lib/scoring.ts @ericsocrat
+src/lib/validation.ts @ericsocrat
+src/lib/types.ts @ericsocrat
+src/**tests**/scoring.test.ts @ericsocrat
+src/**tests**/validation.test.ts @ericsocrat
+
+# Documentation
+
+docs/ @ericsocrat
+\*.md @ericsocrat

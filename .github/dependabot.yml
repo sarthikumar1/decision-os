@@ -9,16 +9,19 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
     groups:
       minor-and-patch:
         update-types:
           - "minor"
           - "patch"
+    commit-message:
+      prefix: "chore(deps)"
     reviewers:
       - "ericsocrat"
     labels:
       - "dependencies"
+      - "area:infrastructure"
 
   # GitHub Actions
   - package-ecosystem: "github-actions"
@@ -27,8 +30,10 @@ updates:
       interval: "weekly"
       day: "monday"
     open-pull-requests-limit: 5
+    commit-message:
+      prefix: "ci(deps)"
     reviewers:
       - "ericsocrat"
     labels:
       - "dependencies"
-      - "ci"
+      - "area:infrastructure"

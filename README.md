@@ -8,12 +8,17 @@
 
 <br/>
 
-[![CI](https://github.com/ericsocrat/decision-os/actions/workflows/ci.yml/badge.svg)](https://github.com/ericsocrat/decision-os/actions)
+**Elite decision intelligence platform — make better decisions with science, not gut feelings.**
+
+<br/>
+
+[![CI](https://github.com/ericsocrat/decision-os/actions/workflows/ci.yml/badge.svg)](https://github.com/ericsocrat/decision-os/actions/workflows/ci.yml)
 [![Deploy](https://img.shields.io/badge/Vercel-deployed-brightgreen?logo=vercel)](https://decision-os-hazel.vercel.app)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](tsconfig.json)
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue?logo=typescript)](tsconfig.json)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-[**Live Demo →**](https://decision-os-hazel.vercel.app) · [Scoring Model](docs/SCORING_MODEL.md) · [Architecture](docs/ARCHITECTURE.md) · [Roadmap](docs/ROADMAP.md)
+[**Live Demo →**](https://decision-os-hazel.vercel.app) · [Docs](docs/) · [Scoring Model](docs/SCORING_MODEL.md) · [Architecture](docs/ARCHITECTURE.md) · [Roadmap](docs/ROADMAP.md) · [Contributing](CONTRIBUTING.md)
 
 </div>
 
@@ -21,15 +26,16 @@
 
 ## What is Decision OS?
 
-Decision OS is a **multi-criteria decision analysis (MCDA)** tool that helps you make structured decisions. Instead of gut feelings or endless pros/cons lists, you:
+Decision OS is a **multi-criteria decision analysis (MCDA)** platform that transforms gut-feel choices into structured, data-driven decisions. It implements a deterministic weighted-sum scoring model with sensitivity analysis — backed by decades of decision science research. Everything runs client-side in your browser with zero accounts, zero backend, and zero data collection.
 
-1. **Define options** (A, B, C…)
-2. **Set criteria** with weights (0–100) and types (benefit/cost)
-3. **Score each option** per criterion (0–10)
-4. **See results** — ranked options with score breakdowns and top drivers
-5. **Run sensitivity analysis** — test if small weight changes flip the winner
+## Quick Start
 
-No accounts. No backend. Everything stays in your browser.
+```bash
+git clone https://github.com/ericsocrat/decision-os.git
+cd decision-os && npm install && npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) — a demo decision is preloaded so you can explore immediately.
 
 ## Screenshots
 
@@ -39,178 +45,124 @@ No accounts. No backend. Everything stays in your browser.
 | :--------------------------------------: | :--------------------------------------: | :----------------------------------------------: |
 | ![Builder](docs/screenshots/builder.png) | ![Results](docs/screenshots/results.png) | ![Sensitivity](docs/screenshots/sensitivity.png) |
 
-## 30-Second Demo Walkthrough
+## Features
 
-1. **Open** [decision-os-hazel.vercel.app](https://decision-os-hazel.vercel.app) — a demo decision loads instantly
-2. **Explore the Builder** — see 3 cities scored across 5 criteria with weights
-3. **Switch to Results** — Austin wins at 6.62; see the per-criterion breakdown
-4. **Check Sensitivity** — discover the winner stays robust across ±25% weight swings
-5. **Edit a score** — change any cell and watch results update in real-time
-6. **Export** — click JSON Export or copy a shareable URL
-7. **Reload the page** — your changes persisted automatically via localStorage
+| Status | Feature                       | Description                                            |
+| ------ | ----------------------------- | ------------------------------------------------------ |
+| ✅     | **Decision Builder**          | Title, options, weighted criteria, scores matrix       |
+| ✅     | **Real-time Results**         | Ranked options with visual score bars and breakdowns   |
+| ✅     | **Top Drivers**               | See which criteria matter most                         |
+| ✅     | **Sensitivity Analysis**      | Test if weight changes flip the winner (±5%–50%)       |
+| ✅     | **JSON Export & URL Sharing** | Download data or copy a shareable link                 |
+| ✅     | **Multiple Decisions**        | Save and switch between decisions                      |
+| ✅     | **8 Decision Templates**      | Job Offer, Vendor, Apartment, Investment, and more     |
+| ✅     | **Undo/Redo**                 | 50-entry history with Ctrl+Z/Ctrl+Shift+Z              |
+| ✅     | **Dark Mode**                 | System-aware with FOUC prevention                      |
+| ✅     | **Charts**                    | Recharts-powered bar and breakdown charts              |
+| ✅     | **Accessible**                | Keyboard navigable, ARIA labels, screen reader support |
+| ✅     | **126 Tests**                 | Comprehensive unit + E2E + a11y test suite             |
+| 🚧     | **Drag-and-Drop**             | Reorder options and criteria                           |
+| 📋     | **TOPSIS Algorithm**          | Alternative ranking method                             |
+| 📋     | **Monte Carlo Simulation**    | Probabilistic sensitivity analysis                     |
+| 📋     | **Collaborative Decisions**   | Real-time multi-user via Supabase                      |
 
-## Quickstart
+## Scoring Model
 
-### Prerequisites
+Decision OS uses a **Weighted Sum Model (WSM)**:
 
-- [Node.js](https://nodejs.org/) 18+ and npm
+$$T_j = \sum_{i=1}^{n} \hat{w}_i \times e_{j,i}$$
 
-### Install & Run
+Where $\hat{w}_i$ is the normalized weight and $e_{j,i}$ is the effective score (adjusted for benefit/cost criteria).
 
-```bash
-git clone https://github.com/ericsocrat/decision-os.git
-cd decision-os
-npm install
-npm run dev
-```
+See [docs/SCORING_MODEL.md](docs/SCORING_MODEL.md) for the full mathematical specification, and [docs/DECISION_FRAMEWORKS.md](docs/DECISION_FRAMEWORKS.md) for all implemented and planned algorithms.
 
-Open [http://localhost:3000](http://localhost:3000) — a demo decision is preloaded so you can explore immediately.
-
-### Commands
-
-| Command              | Description              |
-| -------------------- | ------------------------ |
-| `npm run dev`        | Start development server |
-| `npm run build`      | Production build         |
-| `npm run start`      | Start production server  |
-| `npm run test`       | Run unit tests (Vitest)  |
-| `npm run test:watch` | Run tests in watch mode  |
-| `npm run lint`       | Lint with ESLint         |
-| `npm run typecheck`  | TypeScript type checking |
-| `npm run format`     | Format with Prettier     |
-
-## Tech Stack
-
-| Layer       | Technology                                                  |
-| ----------- | ----------------------------------------------------------- |
-| Framework   | [Next.js 16](https://nextjs.org/) (App Router)              |
-| Language    | [TypeScript](https://www.typescriptlang.org/) (strict mode) |
-| Styling     | [Tailwind CSS 4](https://tailwindcss.com/)                  |
-| Icons       | [Lucide React](https://lucide.dev/)                         |
-| Testing     | [Vitest](https://vitest.dev/) + React Testing Library       |
-| CI/CD       | [GitHub Actions](.github/workflows/ci.yml)                  |
-| Persistence | localStorage (client-side)                                  |
-| Deployment  | [Vercel](https://vercel.com/)                               |
-
-## Architecture
+## Architecture Overview
 
 ```
-src/
-├── app/              # Next.js pages (App Router)
-├── components/       # React UI components
-│   ├── DecisionProvider.tsx  # State management (Context)
-│   ├── DecisionBuilder.tsx   # Options, criteria, scores editor
-│   ├── ResultsView.tsx       # Rankings, breakdowns, exports
-│   └── SensitivityView.tsx   # Weight-swing analysis
-├── lib/              # Pure logic (no React, fully testable)
-│   ├── types.ts      # Domain type definitions
-│   ├── scoring.ts    # Deterministic scoring engine
-│   ├── validation.ts # Input validation
-│   ├── storage.ts    # localStorage persistence
-│   └── demo-data.ts  # Preloaded demo decision
-└── __tests__/        # Unit tests (40+ tests)
+Browser (Client)
+├── UI Layer (React Components)
+│   ├── DecisionBuilder  — Option/criteria/score editing
+│   ├── ResultsView      — Rankings and visualizations
+│   └── SensitivityView  — Weight-swing robustness testing
+├── State Layer (React Context + DecisionProvider)
+│   └── Auto-save to localStorage (300ms debounce)
+└── Logic Layer (Pure Functions)
+    ├── scoring.ts       — Deterministic WSM engine
+    ├── validation.ts    — Input validation
+    └── templates.ts     — 8 pre-built decision templates
 ```
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full system design.
 
-## Scoring Model
+## Tech Stack
 
-Decision OS uses a **Weighted Sum Model**:
+| Layer       | Technology                                                                                                     |
+| ----------- | -------------------------------------------------------------------------------------------------------------- |
+| Framework   | [Next.js 16](https://nextjs.org/) (App Router)                                                                 |
+| Language    | [TypeScript](https://www.typescriptlang.org/) (strict mode)                                                    |
+| Styling     | [Tailwind CSS 4](https://tailwindcss.com/)                                                                     |
+| Charts      | [Recharts](https://recharts.org/) (lazy-loaded)                                                                |
+| Testing     | [Vitest](https://vitest.dev/) + [Playwright](https://playwright.dev/) + [axe-core](https://www.deque.com/axe/) |
+| CI/CD       | [GitHub Actions](.github/workflows/ci.yml)                                                                     |
+| Persistence | localStorage (client-side, zero backend)                                                                       |
+| Deployment  | [Vercel](https://vercel.com/)                                                                                  |
 
-1. **Normalize weights** so they sum to 1.0
-2. **Compute effective scores**: benefit = raw score, cost = 10 − raw score
-3. **Total score** = Σ(normalized_weight × effective_score)
-4. **Rank** options by total score (descending)
+## Commands
 
-### Example
-
-| Option      | Price (cost, w=40) | Performance (benefit, w=35) | Portability (benefit, w=25) | **Total**  |
-| ----------- | :----------------: | :-------------------------: | :-------------------------: | :--------: |
-| MacBook Pro |     8 → eff: 2     |              9              |              7              |  **5.70**  |
-| ThinkPad X1 |     5 → eff: 5     |              7              |              8              | **6.45** ✓ |
-
-See [docs/SCORING_MODEL.md](docs/SCORING_MODEL.md) for the full specification with formulas.
-
-## Features
-
-- ✅ **Decision Builder** — Title, options, weighted criteria, scores matrix
-- ✅ **Real-time Results** — Ranked options with visual score bars and breakdowns
-- ✅ **Top Drivers** — See which criteria matter most
-- ✅ **Sensitivity Analysis** — Test if weight changes flip the winner (±5%–50% swing)
-- ✅ **Explain Results** — Clear explanation of how scores were computed
-- ✅ **JSON Export** — Download decision data and results
-- ✅ **URL Sharing** — Copy shareable link with encoded state
-- ✅ **Multiple Decisions** — Save and switch between decisions
-- ✅ **Demo Decision** — Preloaded example for instant exploration
-- ✅ **Accessible** — Keyboard navigable, ARIA labels, semantic HTML
-- ✅ **Mobile Friendly** — Responsive design, works on all screen sizes
-- ✅ **No Backend** — Everything runs in your browser (localStorage)
+| Command                 | Description                       |
+| ----------------------- | --------------------------------- |
+| `npm run dev`           | Start development server          |
+| `npm run build`         | Production build                  |
+| `npm run lint`          | Lint with ESLint (zero-tolerance) |
+| `npm run typecheck`     | TypeScript strict mode check      |
+| `npm run test`          | Run unit tests (Vitest)           |
+| `npm run test:coverage` | Tests with coverage report        |
+| `npm run test:e2e`      | E2E tests (Playwright)            |
+| `npm run format`        | Format with Prettier              |
 
 ## Deployment
 
-Decision OS is deployed at **[decision-os-hazel.vercel.app](https://decision-os-hazel.vercel.app)**.
+Deployed at **[decision-os-hazel.vercel.app](https://decision-os-hazel.vercel.app)**.
 
-To deploy your own instance:
+Deploy your own:
 
 1. Fork this repository
-2. Go to [vercel.com/new](https://vercel.com/new)
-3. Import your GitHub fork
-4. Click **Deploy** (zero configuration needed — Next.js auto-detected)
-5. Your app is live!
+2. Import at [vercel.com/new](https://vercel.com/new)
+3. Click **Deploy** — zero configuration needed
 
-Or via Vercel CLI:
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for the full deployment guide.
 
-```bash
-npx vercel --prod
-```
+## Documentation
 
-See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for the full deployment guide, branch protection setup, and release workflow.
-
-## Testing
-
-```bash
-npm run test           # Run all 40+ unit tests
-npm run test:watch     # Watch mode
-npm run test:coverage  # With coverage report
-```
-
-Tests cover:
-
-- Weight normalization (including edge cases)
-- Effective score calculation (benefit + cost)
-- Full decision scoring and ranking
-- Sensitivity analysis determinism
-- Input validation
-- Worked example from documentation
+| Document                                           | Description                              |
+| -------------------------------------------------- | ---------------------------------------- |
+| [Architecture](docs/ARCHITECTURE.md)               | System design and module boundaries      |
+| [Scoring Model](docs/SCORING_MODEL.md)             | Mathematical specification with examples |
+| [Decision Frameworks](docs/DECISION_FRAMEWORKS.md) | All algorithms with math foundations     |
+| [CI Architecture](docs/CI_ARCHITECTURE.md)         | CI/CD pipeline design and workflows      |
+| [Governance](docs/GOVERNANCE.md)                   | Decision-making process and roles        |
+| [Monitoring](docs/MONITORING.md)                   | Performance budgets and health metrics   |
+| [Labels](docs/LABELS.md)                           | Issue/PR label taxonomy                  |
+| [Roadmap](docs/ROADMAP.md)                         | Feature roadmap by version               |
+| [ADRs](docs/DECISIONS/)                            | Architecture Decision Records            |
+| [Data Sources](docs/DATA_SOURCES.md)               | Data provenance policy                   |
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines. Key rules:
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
+
+- Setup instructions
+- Development workflow
+- Code style guide
+- Commit message format
+- How to add a new decision algorithm
+- How to add a new UI component
+
+Key rules:
 
 - Don't break the deterministic scoring engine
 - All changes need tests
 - Run `npm run test && npm run lint && npm run typecheck && npm run build` before submitting
-
-## Documentation
-
-| Document                                        | Description                              |
-| ----------------------------------------------- | ---------------------------------------- |
-| [Architecture](docs/ARCHITECTURE.md)            | System design and module boundaries      |
-| [Scoring Model](docs/SCORING_MODEL.md)          | Mathematical specification with examples |
-| [Data Sources](docs/DATA_SOURCES.md)            | Data provenance policy (no scraping)     |
-| [Roadmap](docs/ROADMAP.md)                      | Feature roadmap by version               |
-| [ADRs](docs/DECISIONS/)                         | Architecture Decision Records            |
-| [Copilot Instructions](copilot-instructions.md) | AI agent coding conventions              |
-
-## LinkedIn Feature-Ready Pitch
-
-> **I built Decision OS** — an open-source structured decision-making tool that replaces gut-feel choices with data-driven analysis. It implements a deterministic weighted-sum scoring model with sensitivity analysis, all running client-side in the browser. The project demonstrates production engineering practices: TypeScript strict mode, 40+ unit tests, CI/CD pipeline, comprehensive documentation, and clean architecture with a pure scoring engine separated from the UI layer. Built with Next.js, Tailwind CSS, and deployed on Vercel.
->
-> **Try it live:** [decision-os-hazel.vercel.app](https://decision-os-hazel.vercel.app)
->
-> **Source code:** [github.com/ericsocrat/decision-os](https://github.com/ericsocrat/decision-os)
->
-> Every formula is documented. Every edge case is tested. Every architectural decision has an ADR.
 
 ## License
 

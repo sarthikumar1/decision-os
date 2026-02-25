@@ -42,12 +42,13 @@ src/
 ├── components/       # React components
 │   ├── DecisionProvider.tsx  # State management context + URL share restore
 │   ├── DecisionBuilder.tsx   # Decision editor UI
-│   ├── Header.tsx            # App header (branding, selector, dark toggle)
+│   ├── Header.tsx            # App header (branding, selector, dark toggle, import)
+│   ├── ImportModal.tsx       # JSON/CSV import with preview and drag-and-drop
 │   ├── ResultsView.tsx       # Rankings, chart, export, share
 │   ├── SensitivityView.tsx   # Sensitivity analysis
 │   ├── ScoreChart.tsx        # Recharts visualization
 │   ├── ThemeProvider.tsx     # Dark/light mode context
-│   ├── ErrorBoundary.tsx     # Error boundary with recovery UI
+│   ├── ErrorBoundary.tsx     # Error boundary with error reporting
 │   ├── Announcer.tsx         # Live-region announcer for screen readers
 │   ├── Toast.tsx             # Imperative toast notifications (showToast)
 │   └── TemplatePicker.tsx    # Modal template picker with focus trap
@@ -60,13 +61,17 @@ src/
 │   ├── storage.ts    # localStorage CRUD
 │   ├── demo-data.ts  # Demo decision data
 │   ├── utils.ts      # Utilities
-│   └── templates.ts  # 8 pre-built decision templates
-└── __tests__/        # Unit tests (126 tests, 11 files)
+│   ├── templates.ts  # 8 pre-built decision templates
+│   ├── import.ts     # JSON/CSV import parsing and validation
+│   └── error-reporter.ts  # Production error telemetry
+└── __tests__/        # Unit tests (165 tests, 13 files)
     ├── scoring.test.ts
     ├── validation.test.ts
     ├── utils.test.ts
     ├── storage.test.ts
     ├── templates.test.ts
+    ├── import.test.ts        # Import module tests (30 tests)
+    ├── error-reporter.test.ts  # Error reporter tests (9 tests)
     ├── test-utils.tsx        # renderWithProviders helper
     └── components/           # Component integration tests
         ├── DecisionProvider.test.tsx
@@ -146,6 +151,32 @@ Everything in `src/lib/` must be pure functions with no React dependencies. This
 - Do NOT scrape websites or call external APIs
 - Any external data must be documented in `docs/DATA_SOURCES.md`
 - The app must work fully offline (after initial load)
+
+### 10. Import handling
+
+- Import logic lives in `src/lib/import.ts` (pure functions, no React)
+- JSON import supports both full Decision and results export format
+- CSV import uses a lightweight parser (no external dependencies)
+- Always generate fresh `id` and `createdAt` for imported decisions
+- File size limit: 1 MB. Validate file type before reading.
+- CSV import has a preview step — users confirm before data is saved
+
+### 11. Error reporting
+
+- Use `reportError(error, { source: "..." })` from `src/lib/error-reporter.ts`
+- In development: console.error only (no localStorage writes)
+- In production: logs + stores in localStorage (max 20, FIFO)
+- Sentry forwarding activates when `@sentry/nextjs` is loaded
+- No user PII is captured — Decision OS has no accounts
+- ErrorBoundary, storage, import modules should all use `reportError()`
+
+### 12. Visual regression testing
+
+- Visual tests in `e2e/visual.spec.ts` use Playwright `toHaveScreenshot()`
+- Baselines stored in `e2e/visual.spec.ts-snapshots/` (committed to git)
+- Only Chromium project runs visual tests (cross-browser diffs are expected)
+- Generate baselines: `npx playwright test e2e/visual.spec.ts --update-snapshots`
+- Use `maxDiffPixelRatio: 0.01` (1%) for most tests, 0.02 for mobile/empty
 
 ## Code Style
 

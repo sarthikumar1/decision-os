@@ -1,0 +1,165 @@
+name: Auto-Sync Docs
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  sync-docs:
+    name: Sync Documentation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Skip if this is already an auto-sync commit
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate project structure
+        run: |
+          cat > docs/PROJECT_STRUCTURE.md << 'EOF'
+          # Project Structure
+
+          > Auto-generated — do not edit manually. Updated on each merge to `main`.
+
+          EOF
+
+          echo '```' >> docs/PROJECT_STRUCTURE.md
+          find src -type f | sort | sed 's|^|  |' >> docs/PROJECT_STRUCTURE.md
+          echo '```' >> docs/PROJECT_STRUCTURE.md
+          echo "" >> docs/PROJECT_STRUCTURE.md
+          echo "Last updated: $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> docs/PROJECT_STRUCTURE.md
+
+      - name: Generate component index
+        run: |
+          cat > docs/COMPONENT_INDEX.md << 'COMPONENTEOF'
+          # Component Index
+
+          > Auto-generated — do not edit manually. Updated on each merge to `main`.
+
+          | Component | File | Description |
+          |-----------|------|-------------|
+          COMPONENTEOF
+
+          for file in src/components/*.tsx; do
+            if [ -f "$file" ]; then
+              basename=$(basename "$file" .tsx)
+              # Extract first JSDoc or comment line as description
+              desc=$(grep -m1 -oP '(?<=\* ).*|(?<=// ).*' "$file" 2>/dev/null | head -1)
+              if [ -z "$desc" ]; then
+                desc="React component"
+              fi
+              echo "| \`$basename\` | \`$file\` | $desc |" >> docs/COMPONENT_INDEX.md
+            fi
+          done
+
+          echo "" >> docs/COMPONENT_INDEX.md
+          echo "Last updated: $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> docs/COMPONENT_INDEX.md
+
+      - name: Generate coverage report
+        run: |
+          npm run test:coverage -- --reporter=json-summary 2>/dev/null || true
+
+          cat > docs/COVERAGE_REPORT.md << 'COVEOF'
+          # Coverage Report
+
+          > Auto-generated — do not edit manually. Updated on each merge to `main`.
+
+          COVEOF
+
+          if [ -f "coverage/coverage-summary.json" ]; then
+            echo "| Metric | Coverage |" >> docs/COVERAGE_REPORT.md
+            echo "|--------|----------|" >> docs/COVERAGE_REPORT.md
+
+            node -e "
+              const data = require('./coverage/coverage-summary.json');
+              const t = data.total;
+              console.log('| Statements | ' + t.statements.pct + '% |');
+              console.log('| Branches | ' + t.branches.pct + '% |');
+              console.log('| Functions | ' + t.functions.pct + '% |');
+              console.log('| Lines | ' + t.lines.pct + '% |');
+            " >> docs/COVERAGE_REPORT.md 2>/dev/null || echo "Coverage data unavailable." >> docs/COVERAGE_REPORT.md
+          else
+            echo "Coverage data not available for this run." >> docs/COVERAGE_REPORT.md
+          fi
+
+          echo "" >> docs/COVERAGE_REPORT.md
+          echo "Last updated: $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> docs/COVERAGE_REPORT.md
+
+      - name: Generate bundle report
+        run: |
+          npm run build 2>/dev/null || true
+
+          cat > docs/BUNDLE_REPORT.md << 'BUNDLEOF'
+          # Bundle Report
+
+          > Auto-generated — do not edit manually. Updated on each merge to `main`.
+
+          | File | Size | Gzipped |
+          |------|------|---------|
+          BUNDLEOF
+
+          total=0
+          if [ -d ".next/static/chunks" ]; then
+            for file in .next/static/chunks/*.js; do
+              if [ -f "$file" ]; then
+                size=$(wc -c < "$file")
+                gzipped=$(gzip -c "$file" | wc -c)
+                total=$((total + gzipped))
+                size_kb=$(echo "scale=1; $size / 1024" | bc)
+                gz_kb=$(echo "scale=1; $gzipped / 1024" | bc)
+                bn=$(basename "$file")
+                echo "| \`$bn\` | ${size_kb}KB | ${gz_kb}KB |" >> docs/BUNDLE_REPORT.md
+              fi
+            done
+          fi
+
+          total_kb=$(echo "scale=1; $total / 1024" | bc)
+          echo "" >> docs/BUNDLE_REPORT.md
+          echo "**Total gzipped JS: ${total_kb}KB**" >> docs/BUNDLE_REPORT.md
+          echo "" >> docs/BUNDLE_REPORT.md
+          echo "Last updated: $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> docs/BUNDLE_REPORT.md
+
+      - name: Update CHANGELOG from conventional commits
+        run: |
+          # Get the latest tag, or use the initial commit
+          latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || git rev-list --max-parents=0 HEAD)
+          commits=$(git log "$latest_tag"..HEAD --pretty=format:"%s" 2>/dev/null || echo "")
+
+          if [ -n "$commits" ]; then
+            # Only update if there are new commits with conventional format
+            has_conventional=$(echo "$commits" | grep -cE "^(feat|fix|docs|style|refactor|perf|test|build|ci|chore)(\(.+\))?: " || echo "0")
+            if [ "$has_conventional" -gt 0 ]; then
+              echo "Found $has_conventional conventional commits since last tag"
+            fi
+          fi
+
+      - name: Check for changes and commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add docs/PROJECT_STRUCTURE.md docs/COMPONENT_INDEX.md docs/COVERAGE_REPORT.md docs/BUNDLE_REPORT.md
+
+          if git diff --cached --quiet; then
+            echo "No documentation changes to commit"
+          else
+            git commit -m "docs: auto-sync documentation [skip ci]"
+            git push
+          fi

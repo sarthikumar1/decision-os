@@ -1,0 +1,193 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Version bump type (auto = determine from commits)"
+        required: true
+        default: "auto"
+        type: choice
+        options:
+          - auto
+          - patch
+          - minor
+          - major
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Only run on manual dispatch (tag pushes handled separately)
+    if: github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Determine version bump
+        id: bump
+        run: |
+          current_version=$(node -p "require('./package.json').version")
+          echo "current=$current_version" >> $GITHUB_OUTPUT
+
+          bump_type="${{ github.event.inputs.bump }}"
+
+          if [ "$bump_type" = "auto" ]; then
+            # Get commits since last tag
+            latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+            if [ -n "$latest_tag" ]; then
+              commits=$(git log "$latest_tag"..HEAD --pretty=format:"%s")
+            else
+              commits=$(git log --pretty=format:"%s")
+            fi
+
+            # Determine bump from conventional commits
+            if echo "$commits" | grep -q "BREAKING CHANGE\|!:"; then
+              bump_type="major"
+            elif echo "$commits" | grep -q "^feat"; then
+              bump_type="minor"
+            else
+              bump_type="patch"
+            fi
+          fi
+
+          echo "type=$bump_type" >> $GITHUB_OUTPUT
+
+          # Calculate new version
+          IFS='.' read -r major minor patch <<< "$current_version"
+          case "$bump_type" in
+            major) new_version="$((major + 1)).0.0" ;;
+            minor) new_version="${major}.$((minor + 1)).0" ;;
+            patch) new_version="${major}.${minor}.$((patch + 1))" ;;
+          esac
+
+          echo "new=$new_version" >> $GITHUB_OUTPUT
+          echo "Bumping $current_version → $new_version ($bump_type)"
+
+      - name: Update package.json version
+        run: |
+          npm version ${{ steps.bump.outputs.new }} --no-git-tag-version
+
+      - name: Generate release notes
+        id: notes
+        run: |
+          latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+
+          cat > release-notes.md << 'HEADER'
+          ## What's Changed
+          HEADER
+
+          if [ -n "$latest_tag" ]; then
+            range="$latest_tag..HEAD"
+          else
+            range="HEAD"
+          fi
+
+          # Features
+          feats=$(git log $range --pretty=format:"- %s" --grep="^feat" 2>/dev/null || echo "")
+          if [ -n "$feats" ]; then
+            echo "" >> release-notes.md
+            echo "### ✨ Features" >> release-notes.md
+            echo "$feats" >> release-notes.md
+          fi
+
+          # Bug fixes
+          fixes=$(git log $range --pretty=format:"- %s" --grep="^fix" 2>/dev/null || echo "")
+          if [ -n "$fixes" ]; then
+            echo "" >> release-notes.md
+            echo "### 🐛 Bug Fixes" >> release-notes.md
+            echo "$fixes" >> release-notes.md
+          fi
+
+          # Docs
+          docs_commits=$(git log $range --pretty=format:"- %s" --grep="^docs" 2>/dev/null || echo "")
+          if [ -n "$docs_commits" ]; then
+            echo "" >> release-notes.md
+            echo "### 📝 Documentation" >> release-notes.md
+            echo "$docs_commits" >> release-notes.md
+          fi
+
+          # Other
+          others=$(git log $range --pretty=format:"- %s" --grep="^chore\|^ci\|^refactor\|^perf\|^style\|^test\|^build" 2>/dev/null || echo "")
+          if [ -n "$others" ]; then
+            echo "" >> release-notes.md
+            echo "### 🔧 Other Changes" >> release-notes.md
+            echo "$others" >> release-notes.md
+          fi
+
+          echo "" >> release-notes.md
+          echo "**Full Changelog**: https://github.com/ericsocrat/decision-os/compare/$latest_tag...v${{ steps.bump.outputs.new }}" >> release-notes.md
+
+      - name: Commit, tag, and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add package.json
+          git commit -m "chore: release v${{ steps.bump.outputs.new }} [skip ci]"
+          git tag "v${{ steps.bump.outputs.new }}"
+          git push origin main --tags
+
+      - name: Build
+        run: npm run build
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ steps.bump.outputs.new }}"
+          name: "v${{ steps.bump.outputs.new }}"
+          body_path: release-notes.md
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  release-from-tag:
+    name: Release from Tag
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate release notes
+        run: |
+          tag_name="${GITHUB_REF#refs/tags/}"
+          previous_tag=$(git describe --tags --abbrev=0 "$tag_name^" 2>/dev/null || echo "")
+
+          if [ -n "$previous_tag" ]; then
+            gh release create "$tag_name" \
+              --generate-notes \
+              --notes-start-tag "$previous_tag" \
+              --title "$tag_name"
+          else
+            gh release create "$tag_name" \
+              --generate-notes \
+              --title "$tag_name"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

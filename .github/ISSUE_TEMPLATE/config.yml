@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Discussions
+    url: https://github.com/ericsocrat/decision-os/discussions
+    about: Ask questions, share ideas, or discuss Decision OS in our community forum.
+  - name: 📖 Documentation
+    url: https://github.com/ericsocrat/decision-os/tree/main/docs
+    about: Check the documentation before filing an issue — your answer might already be there.

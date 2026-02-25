@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **JSON/CSV Import**: Import decisions from JSON files (full Decision or results export format) and CSV spreadsheets with preview step. File picker + drag-and-drop support. Lightweight CSV parser (no dependencies). 30 import unit tests. Import button in Header toolbar (#11)
+- **Error Telemetry**: Production error reporter with localStorage diagnostics (max 20 errors, FIFO). Sentry forwarding wired (activates when @sentry/nextjs is loaded). ErrorBoundary now reports via `reportError()`. No PII captured. 9 error reporter unit tests (#40)
+- **Visual Regression Testing**: Playwright visual comparison tests (7 screenshot tests: builder, results, sensitivity, dark mode, empty state, mobile, import modal). Uses `toHaveScreenshot()` with 1-2% tolerance. Only Chromium for consistent rendering. Snapshot workflow documented in CONTRIBUTING.md (#46)
 - **Undo/Redo system**: Full undo/redo with 50-entry history stack, Ctrl+Z / Ctrl+Shift+Z keyboard shortcuts, Undo/Redo toolbar buttons in Builder, toast notifications on destructive removals with Undo action (#8)
 - **Decision Templates**: 8 pre-built templates (Job Offer, Vendor, Apartment, Investment, College, Hiring, Feature Prioritization, Relocation), template picker modal, one-click instantiation via Header (#10)
 - **Component Test Suite**: 126 tests across 11 files — DecisionProvider (18 tests), Header (7), DecisionBuilder (11), ResultsView (8), ThemeProvider (5), ErrorBoundary (4), storage (11), utils (12), templates (10), scoring (27), validation (13). Custom `renderWithProviders` helper. `@testing-library/user-event` for realistic interactions (#7)

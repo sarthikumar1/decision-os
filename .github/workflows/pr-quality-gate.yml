@@ -1,0 +1,180 @@
+name: PR Quality Gate
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  label-pr:
+    name: Auto-Label PR
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed
+        run: |
+          files=$(gh pr diff ${{ github.event.pull_request.number }} --name-only 2>/dev/null || git diff --name-only origin/main...HEAD)
+          echo "files<<EOF" >> $GITHUB_OUTPUT
+          echo "$files" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+          lines=$(gh pr diff ${{ github.event.pull_request.number }} 2>/dev/null | grep -c '^[+-]' || echo "0")
+          echo "lines=$lines" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine area labels
+        id: areas
+        run: |
+          labels=""
+          files="${{ steps.changed.outputs.files }}"
+
+          if echo "$files" | grep -q "^src/components/"; then
+            labels="${labels}area:ui,"
+          fi
+          if echo "$files" | grep -qE "^src/(engine|lib)/"; then
+            labels="${labels}area:logic,"
+          fi
+          if echo "$files" | grep -q "^\.github/"; then
+            labels="${labels}area:infrastructure,"
+          fi
+          if echo "$files" | grep -q "^docs/"; then
+            labels="${labels}area:documentation,"
+          fi
+          if echo "$files" | grep -qE "\.test\.(ts|tsx)$"; then
+            labels="${labels}area:testing,"
+          fi
+
+          # Remove trailing comma
+          labels=$(echo "$labels" | sed 's/,$//')
+          echo "labels=$labels" >> $GITHUB_OUTPUT
+
+      - name: Determine size label
+        id: size
+        run: |
+          lines=${{ steps.changed.outputs.lines }}
+          if [ "$lines" -lt 10 ]; then
+            echo "label=size:XS" >> $GITHUB_OUTPUT
+          elif [ "$lines" -lt 50 ]; then
+            echo "label=size:S" >> $GITHUB_OUTPUT
+          elif [ "$lines" -lt 150 ]; then
+            echo "label=size:M" >> $GITHUB_OUTPUT
+          elif [ "$lines" -lt 500 ]; then
+            echo "label=size:L" >> $GITHUB_OUTPUT
+          else
+            echo "label=size:XL" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Apply labels
+        run: |
+          # Remove existing size labels
+          for size in "size:XS" "size:S" "size:M" "size:L" "size:XL"; do
+            gh pr edit ${{ github.event.pull_request.number }} --remove-label "$size" 2>/dev/null || true
+          done
+
+          # Apply size label
+          gh pr edit ${{ github.event.pull_request.number }} --add-label "${{ steps.size.outputs.label }}" 2>/dev/null || true
+
+          # Apply area labels
+          if [ -n "${{ steps.areas.outputs.labels }}" ]; then
+            IFS=',' read -ra LABELS <<< "${{ steps.areas.outputs.labels }}"
+            for label in "${LABELS[@]}"; do
+              gh pr edit ${{ github.event.pull_request.number }} --add-label "$label" 2>/dev/null || true
+            done
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  check-title:
+    name: Check PR Title
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Validate conventional commit format
+        run: |
+          title="${{ github.event.pull_request.title }}"
+          # Match conventional commit: type(scope): description
+          if ! echo "$title" | grep -qE "^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?: .+"; then
+            echo "::error::PR title must follow conventional commit format: type(scope): description"
+            echo ""
+            echo "Valid types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert"
+            echo "Examples:"
+            echo "  feat: add Monte Carlo simulation"
+            echo "  fix(scoring): correct weight normalization"
+            echo "  docs: update architecture diagram"
+            exit 1
+          fi
+          echo "✅ PR title follows conventional commit format"
+
+  pr-comment:
+    name: PR Summary Comment
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and analyze
+        run: |
+          npm run build 2>&1 | tail -20 > build-output.txt
+          npm run typecheck 2>&1 | tail -5 > typecheck-output.txt || true
+
+      - name: Generate PR comment
+        run: |
+          cat > pr-comment.md << 'COMMENT_EOF'
+          ## 🔍 PR Quality Report
+
+          ### Build Status
+          ```
+          COMMENT_EOF
+
+          cat build-output.txt >> pr-comment.md
+          echo '```' >> pr-comment.md
+
+          # Check for new components
+          new_components=$(git diff --name-only --diff-filter=A origin/main...HEAD -- 'src/components/*.tsx' 2>/dev/null || echo "")
+          if [ -n "$new_components" ]; then
+            echo "" >> pr-comment.md
+            echo "### 🆕 New Components" >> pr-comment.md
+            echo "$new_components" | while read -r comp; do
+              echo "- \`$(basename $comp)\`" >> pr-comment.md
+            done
+          fi
+
+          # Lines changed summary
+          lines=$(git diff --stat origin/main...HEAD 2>/dev/null | tail -1 || echo "N/A")
+          echo "" >> pr-comment.md
+          echo "### 📊 Change Summary" >> pr-comment.md
+          echo "$lines" >> pr-comment.md
+
+          echo "" >> pr-comment.md
+          echo "---" >> pr-comment.md
+          echo "*Generated automatically by PR Quality Gate*" >> pr-comment.md
+
+      - name: Post or update comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          path: pr-comment.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
