@@ -1,22 +1,24 @@
 /**
- * Results view — ranked options, breakdown, top drivers, export/share.
+ * Results view — ranked options, breakdown, top drivers, chart visualization, export/share.
  */
 
 "use client";
 
 import { useDecision } from "./DecisionProvider";
-import { Download, Link, Trophy, TrendingUp, BarChart3 } from "lucide-react";
-import { useState } from "react";
+import { ScoreChart } from "./ScoreChart";
+import { Download, Link, Trophy, TrendingUp, BarChart3, FileText } from "lucide-react";
+import { useState, useRef } from "react";
 import { encodeDecisionToUrl } from "@/lib/utils";
 import { normalizeWeights } from "@/lib/scoring";
 
 export function ResultsView() {
   const { decision, results } = useDecision();
   const [shareStatus, setShareStatus] = useState<string>("");
+  const printRef = useRef<HTMLDivElement>(null);
 
   if (results.optionResults.length === 0) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-gray-50 p-6 text-center text-gray-500">
+      <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-6 text-center text-gray-500 dark:text-gray-400">
         <BarChart3 className="h-8 w-8 mx-auto mb-2 text-gray-400" />
         <p>Add at least 2 options and 1 criterion to see results.</p>
       </div>
@@ -69,27 +71,39 @@ export function ResultsView() {
     }
   };
 
+  const handlePrintPdf = () => {
+    window.print();
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" ref={printRef}>
       {/* Ranking */}
       <section aria-labelledby="ranking-heading">
         <div className="flex items-center justify-between mb-3">
-          <h2 id="ranking-heading" className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <h2 id="ranking-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
             <Trophy className="h-5 w-5 text-yellow-500" />
             Rankings
           </h2>
           <div className="flex items-center gap-2">
             <button
               onClick={handleExportJson}
-              className="inline-flex items-center gap-1 rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+              className="inline-flex items-center gap-1 rounded-md border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
               aria-label="Export results as JSON"
             >
               <Download className="h-4 w-4" />
               <span className="hidden sm:inline">Export JSON</span>
             </button>
             <button
+              onClick={handlePrintPdf}
+              className="inline-flex items-center gap-1 rounded-md border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors print:hidden"
+              aria-label="Print / export as PDF"
+            >
+              <FileText className="h-4 w-4" />
+              <span className="hidden sm:inline">PDF</span>
+            </button>
+            <button
               onClick={handleShareLink}
-              className="inline-flex items-center gap-1 rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+              className="inline-flex items-center gap-1 rounded-md border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
               aria-label="Copy share link"
             >
               <Link className="h-4 w-4" />
@@ -116,8 +130,8 @@ export function ResultsView() {
                 key={r.optionId}
                 className={`rounded-lg border p-4 ${
                   isWinner
-                    ? "border-blue-200 bg-blue-50"
-                    : "border-gray-200 bg-white"
+                    ? "border-blue-200 bg-blue-50 dark:border-blue-700 dark:bg-blue-900/30"
+                    : "border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
@@ -126,19 +140,19 @@ export function ResultsView() {
                       className={`inline-flex h-7 w-7 items-center justify-center rounded-full text-sm font-bold ${
                         isWinner
                           ? "bg-blue-600 text-white"
-                          : "bg-gray-200 text-gray-600"
+                          : "bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-300"
                       }`}
                     >
                       {r.rank}
                     </span>
-                    <span className="font-medium text-gray-900">{r.optionName}</span>
+                    <span className="font-medium text-gray-900 dark:text-gray-100">{r.optionName}</span>
                     {isWinner && (
                       <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
                         Winner
                       </span>
                     )}
                   </div>
-                  <span className="text-lg font-bold text-gray-900">
+                  <span className="text-lg font-bold text-gray-900 dark:text-gray-100">
                     {r.totalScore.toFixed(2)}
                   </span>
                 </div>
@@ -163,10 +177,10 @@ export function ResultsView() {
                   {r.criterionScores.map((cs) => (
                     <div
                       key={cs.criterionId}
-                      className="text-xs text-gray-600 flex items-center justify-between bg-gray-50 rounded px-2 py-1"
+                      className="text-xs text-gray-600 dark:text-gray-400 flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded px-2 py-1"
                     >
                       <span className="truncate mr-1">{cs.criterionName}</span>
-                      <span className="font-medium text-gray-900">
+                      <span className="font-medium text-gray-900 dark:text-gray-200">
                         {cs.effectiveScore.toFixed(2)}
                       </span>
                     </div>
@@ -178,24 +192,35 @@ export function ResultsView() {
         </div>
       </section>
 
+      {/* Score Chart Visualization */}
+      <section aria-labelledby="chart-heading" className="print:hidden">
+        <h2 id="chart-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-3">
+          <BarChart3 className="h-5 w-5 text-blue-600" />
+          Score Visualization
+        </h2>
+        <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
+          <ScoreChart optionResults={results.optionResults} />
+        </div>
+      </section>
+
       {/* Top Drivers */}
       <section aria-labelledby="drivers-heading">
-        <h2 id="drivers-heading" className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-3">
+        <h2 id="drivers-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-3">
           <TrendingUp className="h-5 w-5 text-green-600" />
           Top Drivers
         </h2>
-        <div className="rounded-lg border border-gray-200 bg-white">
+        <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           {results.topDrivers.map((driver, index) => {
             const pct = (driver.normalizedWeight * 100).toFixed(1);
             return (
               <div
                 key={driver.criterionId}
                 className={`flex items-center justify-between p-3 ${
-                  index < results.topDrivers.length - 1 ? "border-b border-gray-100" : ""
+                  index < results.topDrivers.length - 1 ? "border-b border-gray-100 dark:border-gray-700" : ""
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-900">{driver.criterionName}</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{driver.criterionName}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-32 h-2 rounded-full bg-gray-100 overflow-hidden">
@@ -204,7 +229,7 @@ export function ResultsView() {
                       style={{ width: `${driver.normalizedWeight * 100}%` }}
                     />
                   </div>
-                  <span className="text-sm font-medium text-gray-700 w-12 text-right">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300 w-12 text-right">
                     {pct}%
                   </span>
                 </div>
@@ -216,10 +241,10 @@ export function ResultsView() {
 
       {/* Explain Results */}
       <section aria-labelledby="explain-heading">
-        <h2 id="explain-heading" className="text-lg font-semibold text-gray-900 mb-3">
+        <h2 id="explain-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
           Explain This Result
         </h2>
-        <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700 space-y-2">
+        <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 text-sm text-gray-700 dark:text-gray-300 space-y-2">
           <p>
             <strong>How scoring works:</strong> Each criterion&apos;s raw weight is
             normalized so all weights sum to 100%. For each option, scores (0–10)
