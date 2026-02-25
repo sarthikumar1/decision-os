@@ -16,6 +16,7 @@ import { SensitivityView } from "@/components/SensitivityView";
 import { DecisionSkeleton } from "@/components/DecisionSkeleton";
 import { useValidation } from "@/hooks/useValidation";
 import { Settings2, BarChart3, Activity, Keyboard, X } from "lucide-react";
+import { ToastProvider } from "@/components/Toast";
 import pkg from "../../package.json";
 
 const emptySubscribe = () => () => {};
@@ -43,7 +44,7 @@ function AppContent() {
   const shortcutTriggerRef = useRef<HTMLButtonElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const announce = useAnnounce();
-  const { decision, isLoading } = useDecision();
+  const { decision, isLoading, undo, redo, canUndo, canRedo } = useDecision();
   const validation = useValidation(decision);
 
   // Focus the active tab button after tab change via arrow keys
@@ -88,10 +89,23 @@ function AppContent() {
     shortcutTriggerRef.current?.focus();
   }, []);
 
-  // Global keyboard shortcuts (1/2/3/?)
+  // Global keyboard shortcuts (1/2/3/?/Ctrl+Z/Ctrl+Shift+Z)
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      // Ignore when typing in inputs
+      // Undo/Redo — works even in inputs (Ctrl/Cmd + Z/Shift+Z/Y)
+      const mod = e.ctrlKey || e.metaKey;
+      if (mod && e.key === "z" && !e.shiftKey) {
+        e.preventDefault();
+        undo();
+        return;
+      }
+      if (mod && ((e.key === "z" && e.shiftKey) || e.key === "y")) {
+        e.preventDefault();
+        redo();
+        return;
+      }
+
+      // Ignore remaining shortcuts when typing in inputs
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
 
@@ -116,7 +130,7 @@ function AppContent() {
           break;
       }
     },
-    [closeModal, announce]
+    [closeModal, announce, undo, redo]
   );
 
   useEffect(() => {
@@ -294,6 +308,8 @@ function AppContent() {
                 ["3", "Sensitivity tab"],
                 ["←/→", "Navigate tabs"],
                 ["Home/End", "First/last tab"],
+                ["Ctrl+Z", "Undo"],
+                ["Ctrl+Shift+Z", "Redo"],
                 ["?", "Toggle this dialog"],
                 ["Esc", "Close dialog"],
               ].map(([key, desc]) => (
@@ -332,7 +348,9 @@ export default function Home() {
     <ErrorBoundary>
       <AnnouncerProvider>
         <DecisionProvider>
-          <AppContent />
+          <ToastProvider>
+            <AppContent />
+          </ToastProvider>
         </DecisionProvider>
       </AnnouncerProvider>
     </ErrorBoundary>

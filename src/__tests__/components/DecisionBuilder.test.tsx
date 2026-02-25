@@ -1,0 +1,110 @@
+/**
+ * Tests for DecisionBuilder component.
+ */
+
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { screen } from "@testing-library/react";
+import { renderWithProviders } from "../test-utils";
+import { DecisionBuilder } from "@/components/DecisionBuilder";
+import type { ValidationResult } from "@/hooks/useValidation";
+
+// Mock showToast since it depends on global state
+vi.mock("@/components/Toast", () => ({
+  showToast: vi.fn(),
+}));
+
+const emptyValidation: ValidationResult = {
+  issues: [],
+  errors: [],
+  warnings: [],
+  infos: [],
+  errorCount: 0,
+  isValid: true,
+  byId: new Map(),
+  byField: new Map(),
+};
+
+beforeEach(() => {
+  localStorage.clear();
+});
+
+describe("DecisionBuilder", () => {
+  it("renders Decision Details heading", () => {
+    renderWithProviders(<DecisionBuilder validation={emptyValidation} />);
+    expect(screen.getByText("Decision Details")).toBeInTheDocument();
+  });
+
+  it("renders title input with initial demo value", () => {
+    renderWithProviders(<DecisionBuilder validation={emptyValidation} />);
+    const titleInput = screen.getByLabelText(/title/i);
+    expect(titleInput).toBeInTheDocument();
+    expect((titleInput as HTMLInputElement).value.length).toBeGreaterThan(0);
+  });
+
+  it("renders description textarea", () => {
+    renderWithProviders(<DecisionBuilder validation={emptyValidation} />);
+    const desc = screen.getByPlaceholderText(/brief context/i);
+    expect(desc).toBeInTheDocument();
+  });
+
+  it("renders Options section with Add Option button", () => {
+    renderWithProviders(<DecisionBuilder validation={emptyValidation} />);
+    expect(screen.getByText("Options")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /add option/i })).toBeInTheDocument();
+  });
+
+  it("renders Criteria section with Add Criterion button", () => {
+    renderWithProviders(<DecisionBuilder validation={emptyValidation} />);
+    expect(screen.getByText("Criteria")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /add criterion/i })).toBeInTheDocument();
+  });
+
+  it("renders Scores Matrix section", () => {
+    renderWithProviders(<DecisionBuilder validation={emptyValidation} />);
+    expect(screen.getByText(/scores matrix/i)).toBeInTheDocument();
+    expect(screen.getByRole("grid", { name: /scores matrix/i })).toBeInTheDocument();
+  });
+
+  it("renders Undo and Redo buttons", () => {
+    renderWithProviders(<DecisionBuilder validation={emptyValidation} />);
+    expect(screen.getByRole("button", { name: /undo/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /redo/i })).toBeInTheDocument();
+  });
+
+  it("Undo button is disabled when no history", () => {
+    renderWithProviders(<DecisionBuilder validation={emptyValidation} />);
+    const undoBtn = screen.getByRole("button", { name: /undo/i });
+    expect(undoBtn).toBeDisabled();
+  });
+
+  it("adds an option when Add Option is clicked", async () => {
+    const { user } = renderWithProviders(<DecisionBuilder validation={emptyValidation} />);
+    const inputs = screen.getAllByRole("textbox");
+    const initialCount = inputs.length;
+    await user.click(screen.getByRole("button", { name: /add option/i }));
+    const newInputs = screen.getAllByRole("textbox");
+    expect(newInputs.length).toBeGreaterThan(initialCount);
+  });
+
+  it("renders score inputs in the grid", () => {
+    renderWithProviders(<DecisionBuilder validation={emptyValidation} />);
+    const grid = screen.getByRole("grid");
+    const scoreInputs = grid.querySelectorAll('input[type="number"]');
+    // Demo data has 3 options × 4 criteria = 12 score inputs
+    expect(scoreInputs.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("shows validation error on title when present", () => {
+    const validation: ValidationResult = {
+      ...emptyValidation,
+      isValid: false,
+      errorCount: 1,
+      errors: [{ field: "title", severity: "error", message: "Decision title is required" }],
+      byField: new Map([
+        ["title", [{ field: "title", severity: "error", message: "Decision title is required" }]],
+      ]),
+    };
+    renderWithProviders(<DecisionBuilder validation={validation} />);
+    expect(screen.getByText("Decision title is required")).toBeInTheDocument();
+  });
+});

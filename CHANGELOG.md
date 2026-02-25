@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Undo/Redo system**: Full undo/redo with 50-entry history stack, Ctrl+Z / Ctrl+Shift+Z keyboard shortcuts, Undo/Redo toolbar buttons in Builder, toast notifications on destructive removals with Undo action (#8)
+- **Decision Templates**: 8 pre-built templates (Job Offer, Vendor, Apartment, Investment, College, Hiring, Feature Prioritization, Relocation), template picker modal, one-click instantiation via Header (#10)
+- **Component Test Suite**: 126 tests across 11 files — DecisionProvider (18 tests), Header (7), DecisionBuilder (11), ResultsView (8), ThemeProvider (5), ErrorBoundary (4), storage (11), utils (12), templates (10), scoring (27), validation (13). Custom `renderWithProviders` helper. `@testing-library/user-event` for realistic interactions (#7)
+- **Toast notification system**: Imperative `showToast()` with auto-dismiss (3s), hover-to-pause, action buttons, max 5 stack, slide-up animation (#8)
 - **Automated a11y testing**: axe-core Playwright E2E tests scan Builder, Results, Sensitivity, shortcuts modal, dark mode, and new decisions for WCAG 2.1 AA violations (#42)
 - **Real-time validation feedback**: `useValidation` hook surfaces errors/warnings/infos inline in Builder; red badge on Builder tab shows error count; Results tab shows guard for blocking errors and yellow banner for warnings (#9)
 - **Lazy-loaded ScoreChart**: Recharts component lazy-loaded via `React.lazy` + `Suspense` to reduce initial bundle size (#13)

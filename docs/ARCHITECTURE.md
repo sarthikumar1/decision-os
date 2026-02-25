@@ -40,6 +40,7 @@ Decision OS is a client-side web application built with Next.js (App Router) and
 | `storage.ts`    | localStorage CRUD operations                                          |
 | `demo-data.ts`  | Preloaded demo decision                                               |
 | `utils.ts`      | Utilities (ID generation, URL encoding/decoding, relative time)       |
+| `templates.ts`  | 8 pre-built decision templates with `instantiateTemplate()` factory   |
 
 ### `/src/components/` — React UI Components
 
@@ -55,6 +56,8 @@ Decision OS is a client-side web application built with Next.js (App Router) and
 | `ErrorBoundary.tsx`    | Class-based error boundary with recovery UI                         |
 | `Announcer.tsx`        | Live-region announcer for screen reader CRUD notifications          |
 | `DecisionSkeleton.tsx` | Pulsing placeholder skeleton shown during decision switching        |
+| `Toast.tsx`            | Imperative toast notifications with auto-dismiss and undo actions   |
+| `TemplatePicker.tsx`   | Modal template picker with focus trap and card grid                 |
 
 ### `/src/hooks/` — Custom React Hooks
 
@@ -89,6 +92,10 @@ Decision OS is a client-side web application built with Next.js (App Router) and
 7. **Dark mode**: System-preference-aware with localStorage persistence. FOUC prevented via inline `<script>` in layout.
 
 8. **Inline validation**: `useValidation` hook provides memoized real-time feedback (errors, warnings, infos) without blocking save. Builder shows inline borders/messages; Results tab shows a guard for critical errors and a warning banner for non-blocking issues.
+
+9. **Undo/Redo**: 50-entry history stack using `useRef` (avoids unnecessary re-renders). All mutation functions call `pushUndo()` before state update. `clearHistory()` resets on decision switch. Keyboard shortcuts (Ctrl+Z, Ctrl+Shift+Z) work even inside inputs.
+
+10. **Templates**: Pre-built decision templates defined statically in `src/lib/templates.ts`. `instantiateTemplate()` generates fresh IDs and zero scores. Template picker modal uses focus trap and accessible dialog pattern.
 
 ## Data Flow
 

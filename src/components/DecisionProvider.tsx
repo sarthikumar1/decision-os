@@ -70,6 +70,12 @@ interface DecisionContextValue {
   // Sensitivity
   swingPercent: number;
   setSwingPercent: (v: number) => void;
+
+  // Undo/Redo
+  undo: () => void;
+  redo: () => void;
+  canUndo: boolean;
+  canRedo: boolean;
 }
 
 const DecisionContext = createContext<DecisionContextValue | null>(null);
@@ -115,6 +121,29 @@ export function DecisionProvider({ children }: { children: ReactNode }) {
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const announce = useAnnounce();
 
+  // ── Undo/Redo history stacks ──────────────────────────────
+  const MAX_UNDO = 50;
+  const undoStackRef = useRef<Decision[]>([]);
+  const redoStackRef = useRef<Decision[]>([]);
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
+
+  /** Push current state onto the undo stack before a mutation */
+  const pushUndo = useCallback((current: Decision) => {
+    undoStackRef.current = [...undoStackRef.current.slice(-(MAX_UNDO - 1)), current];
+    redoStackRef.current = []; // New mutation clears redo
+    setCanUndo(true);
+    setCanRedo(false);
+  }, []);
+
+  /** Clear history (on navigation actions) */
+  const clearHistory = useCallback(() => {
+    undoStackRef.current = [];
+    redoStackRef.current = [];
+    setCanUndo(false);
+    setCanRedo(false);
+  }, []);
+
   // Auto-save on decision change (debounced)
   useEffect(() => {
     if (!isDirty) return;
@@ -137,10 +166,46 @@ export function DecisionProvider({ children }: { children: ReactNode }) {
     [decision, swingPercent]
   );
 
-  const setDecision = useCallback((d: Decision) => {
-    setDecisionState({ ...d, updatedAt: new Date().toISOString() });
+  const setDecision = useCallback(
+    (d: Decision) => {
+      setDecisionState((prev) => {
+        pushUndo(prev);
+        return { ...d, updatedAt: new Date().toISOString() };
+      });
+      setIsDirty(true);
+    },
+    [pushUndo],
+  );
+
+  /** Undo: restore previous state from undo stack */
+  const undo = useCallback(() => {
+    if (undoStackRef.current.length === 0) return;
+    const previous = undoStackRef.current[undoStackRef.current.length - 1];
+    undoStackRef.current = undoStackRef.current.slice(0, -1);
+    setDecisionState((current) => {
+      redoStackRef.current = [...redoStackRef.current, current];
+      setCanRedo(true);
+      return previous;
+    });
+    setCanUndo(undoStackRef.current.length > 0);
     setIsDirty(true);
-  }, []);
+    announce("Undone");
+  }, [announce]);
+
+  /** Redo: restore state from redo stack */
+  const redo = useCallback(() => {
+    if (redoStackRef.current.length === 0) return;
+    const next = redoStackRef.current[redoStackRef.current.length - 1];
+    redoStackRef.current = redoStackRef.current.slice(0, -1);
+    setDecisionState((current) => {
+      undoStackRef.current = [...undoStackRef.current, current];
+      setCanUndo(true);
+      return next;
+    });
+    setCanRedo(redoStackRef.current.length > 0);
+    setIsDirty(true);
+    announce("Redone");
+  }, [announce]);
 
   const loadDecision = useCallback(
     (id: string) => {
@@ -149,12 +214,13 @@ export function DecisionProvider({ children }: { children: ReactNode }) {
         setIsLoading(true);
         setDecisionState(d);
         setIsDirty(false);
+        clearHistory();
         announce(`Loaded decision: ${d.title}`);
         // Brief loading skeleton for visual feedback
         requestAnimationFrame(() => setIsLoading(false));
       }
     },
-    [announce]
+    [announce, clearHistory],
   );
 
   const createNewDecision = useCallback(() => {
@@ -176,8 +242,9 @@ export function DecisionProvider({ children }: { children: ReactNode }) {
     setDecisionState(newDecision);
     setDecisions(getDecisions());
     setIsDirty(false);
+    clearHistory();
     announce("New decision created");
-  }, [announce]);
+  }, [announce, clearHistory]);
 
   const removeDecision = useCallback(
     (id: string) => {
@@ -187,10 +254,11 @@ export function DecisionProvider({ children }: { children: ReactNode }) {
         if (decision.id === id && remaining.length > 0) {
           setDecisionState(remaining[0]);
         }
+        clearHistory();
         announce("Decision deleted");
       }
     },
-    [decision.id, announce]
+    [decision.id, announce, clearHistory],
   );
 
   const resetDemoFn = useCallback(() => {
@@ -199,8 +267,9 @@ export function DecisionProvider({ children }: { children: ReactNode }) {
     setDecisions(saved);
     setDecisionState(saved[0]);
     setIsDirty(false);
+    clearHistory();
     announce("Demo data restored");
-  }, [announce]);
+  }, [announce, clearHistory]);
 
   // Field updates
   const updateTitle = useCallback(
@@ -327,6 +396,10 @@ export function DecisionProvider({ children }: { children: ReactNode }) {
     updateScore,
     swingPercent,
     setSwingPercent,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
   };
 
   return <DecisionContext.Provider value={value}>{children}</DecisionContext.Provider>;

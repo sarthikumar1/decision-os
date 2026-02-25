@@ -48,7 +48,9 @@ src/
 │   ├── ScoreChart.tsx        # Recharts visualization
 │   ├── ThemeProvider.tsx     # Dark/light mode context
 │   ├── ErrorBoundary.tsx     # Error boundary with recovery UI
-│   └── Announcer.tsx         # Live-region announcer for screen readers
+│   ├── Announcer.tsx         # Live-region announcer for screen readers
+│   ├── Toast.tsx             # Imperative toast notifications (showToast)
+│   └── TemplatePicker.tsx    # Modal template picker with focus trap
 ├── hooks/            # Custom React hooks
 │   └── useValidation.ts     # Memoized validation (errors/warnings/infos)
 ├── lib/              # Pure logic (no React)
@@ -57,10 +59,22 @@ src/
 │   ├── validation.ts # Input validation
 │   ├── storage.ts    # localStorage CRUD
 │   ├── demo-data.ts  # Demo decision data
-│   └── utils.ts      # Utilities
-└── __tests__/        # Unit tests
+│   ├── utils.ts      # Utilities
+│   └── templates.ts  # 8 pre-built decision templates
+└── __tests__/        # Unit tests (126 tests, 11 files)
     ├── scoring.test.ts
-    └── validation.test.ts
+    ├── validation.test.ts
+    ├── utils.test.ts
+    ├── storage.test.ts
+    ├── templates.test.ts
+    ├── test-utils.tsx        # renderWithProviders helper
+    └── components/           # Component integration tests
+        ├── DecisionProvider.test.tsx
+        ├── Header.test.tsx
+        ├── DecisionBuilder.test.tsx
+        ├── ResultsView.test.tsx
+        ├── ThemeProvider.test.tsx
+        └── ErrorBoundary.test.tsx
 ```
 
 ## CRITICAL RULES
@@ -115,8 +129,19 @@ Everything in `src/lib/` must be pure functions with no React dependencies. This
 - All decision state flows through `DecisionProvider` (React Context)
 - Auto-save to localStorage with 300ms debounce
 - Never mutate state directly — always spread/copy
+- Undo/redo history (50 entries max) via `undoStackRef` / `redoStackRef`
+- All mutations call `pushUndo(prev)` before state update
+- `clearHistory()` resets on decision switch
+- Use `showToast()` with `{ action: { label: "Undo", onClick: undo } }` for destructive actions
 
-### 8. No external data fetching
+### 8. Templates
+
+- Template definitions in `src/lib/templates.ts` (`TEMPLATES` array)
+- `instantiateTemplate(template)` generates fresh IDs and zero scores
+- Add new templates by appending to the `TEMPLATES` array
+- Template weights should sum to 100, minimum 2 options and 1 criterion
+
+### 9. No external data fetching
 
 - Do NOT scrape websites or call external APIs
 - Any external data must be documented in `docs/DATA_SOURCES.md`

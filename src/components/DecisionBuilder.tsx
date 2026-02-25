@@ -5,7 +5,8 @@
 "use client";
 
 import { useDecision } from "./DecisionProvider";
-import { Plus, Trash2, Info, Clock, AlertCircle, AlertTriangle } from "lucide-react";
+import { Plus, Trash2, Info, Clock, AlertCircle, AlertTriangle, Undo2, Redo2 } from "lucide-react";
+import { showToast } from "./Toast";
 import { formatRelativeTime } from "@/lib/utils";
 import type { CriterionType } from "@/lib/types";
 import type { ValidationResult } from "@/hooks/useValidation";
@@ -27,6 +28,10 @@ export function DecisionBuilder({ validation }: DecisionBuilderProps) {
     updateCriterion,
     removeCriterion,
     updateScore,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
   } = useDecision();
 
   const gridRef = useRef<HTMLTableElement>(null);
@@ -69,6 +74,30 @@ export function DecisionBuilder({ validation }: DecisionBuilderProps) {
 
   return (
     <div className="space-y-6">
+      {/* Undo/Redo toolbar */}
+      <div className="flex items-center gap-1">
+        <button
+          onClick={undo}
+          disabled={!canUndo}
+          className="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent dark:disabled:hover:bg-transparent"
+          aria-label="Undo (Ctrl+Z)"
+          title="Undo (Ctrl+Z)"
+        >
+          <Undo2 className="h-4 w-4" />
+          <span className="hidden sm:inline text-xs">Undo</span>
+        </button>
+        <button
+          onClick={redo}
+          disabled={!canRedo}
+          className="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent dark:disabled:hover:bg-transparent"
+          aria-label="Redo (Ctrl+Shift+Z)"
+          title="Redo (Ctrl+Shift+Z)"
+        >
+          <Redo2 className="h-4 w-4" />
+          <span className="hidden sm:inline text-xs">Redo</span>
+        </button>
+      </div>
+
       {/* Title & Description */}
       <section aria-labelledby="decision-heading">
         <h2
@@ -203,7 +232,13 @@ export function DecisionBuilder({ validation }: DecisionBuilderProps) {
                   />
                   {decision.options.length > 2 && (
                     <button
-                      onClick={() => removeOption(opt.id)}
+                      onClick={() => {
+                        removeOption(opt.id);
+                        showToast({
+                          text: `Option "${opt.name}" removed`,
+                          action: { label: "Undo", onClick: undo },
+                        });
+                      }}
                       className="rounded-md p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors"
                       aria-label={`Remove option ${opt.name}`}
                     >
@@ -324,7 +359,13 @@ export function DecisionBuilder({ validation }: DecisionBuilderProps) {
                   </select>
                   {decision.criteria.length > 1 && (
                     <button
-                      onClick={() => removeCriterion(crit.id)}
+                      onClick={() => {
+                        removeCriterion(crit.id);
+                        showToast({
+                          text: `Criterion "${crit.name}" removed`,
+                          action: { label: "Undo", onClick: undo },
+                        });
+                      }}
                       className="rounded-md p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors"
                       aria-label={`Remove criterion ${crit.name}`}
                     >

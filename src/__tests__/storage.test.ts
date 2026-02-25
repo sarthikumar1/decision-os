@@ -1,0 +1,125 @@
+/**
+ * Unit tests for localStorage persistence layer.
+ */
+
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import { getDecisions, getDecision, saveDecision, deleteDecision, resetToDemo } from "@/lib/storage";
+import { DEMO_DECISION } from "@/lib/demo-data";
+import type { Decision } from "@/lib/types";
+
+const STORAGE_KEY = "decision-os:decisions";
+
+function makeDecision(overrides: Partial<Decision> = {}): Decision {
+  const now = new Date().toISOString();
+  return {
+    id: `test-${Date.now()}`,
+    title: "Test Decision",
+    description: "",
+    options: [
+      { id: "o1", name: "A" },
+      { id: "o2", name: "B" },
+    ],
+    criteria: [{ id: "c1", name: "Speed", weight: 50, type: "benefit" }],
+    scores: { o1: { c1: 5 }, o2: { c1: 7 } },
+    createdAt: now,
+    updatedAt: now,
+    ...overrides,
+  };
+}
+
+beforeEach(() => {
+  localStorage.clear();
+});
+
+describe("getDecisions", () => {
+  it("returns demo data when localStorage is empty", () => {
+    const decs = getDecisions();
+    expect(decs).toHaveLength(1);
+    expect(decs[0].id).toBe(DEMO_DECISION.id);
+  });
+
+  it("returns saved decisions from localStorage", () => {
+    const custom = makeDecision({ id: "custom-1", title: "Custom" });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([custom]));
+    const decs = getDecisions();
+    expect(decs).toHaveLength(1);
+    expect(decs[0].id).toBe("custom-1");
+  });
+
+  it("resets to demo on corrupt localStorage data", () => {
+    localStorage.setItem(STORAGE_KEY, "not-json");
+    const decs = getDecisions();
+    expect(decs).toHaveLength(1);
+    expect(decs[0].id).toBe(DEMO_DECISION.id);
+  });
+
+  it("resets to demo when stored data is empty array", () => {
+    localStorage.setItem(STORAGE_KEY, "[]");
+    const decs = getDecisions();
+    expect(decs).toHaveLength(1);
+    expect(decs[0].id).toBe(DEMO_DECISION.id);
+  });
+});
+
+describe("getDecision", () => {
+  it("returns a specific decision by ID", () => {
+    const d = getDecisions(); // seeds demo
+    const found = getDecision(d[0].id);
+    expect(found).toBeDefined();
+    expect(found!.id).toBe(d[0].id);
+  });
+
+  it("returns undefined for non-existent ID", () => {
+    getDecisions(); // seed
+    expect(getDecision("nonexistent")).toBeUndefined();
+  });
+});
+
+describe("saveDecision", () => {
+  it("persists a new decision and retrieves it", () => {
+    const custom = makeDecision({ id: "save-test", title: "Saved" });
+    saveDecision(custom);
+    const decs = getDecisions();
+    expect(decs.some((d) => d.id === "save-test")).toBe(true);
+  });
+
+  it("updates an existing decision in place", () => {
+    const custom = makeDecision({ id: "update-test", title: "Before" });
+    saveDecision(custom);
+    saveDecision({ ...custom, title: "After" });
+    const found = getDecision("update-test");
+    expect(found?.title).toBe("After");
+  });
+});
+
+describe("deleteDecision", () => {
+  it("removes a decision from the list", () => {
+    const a = makeDecision({ id: "del-a", title: "A" });
+    const b = makeDecision({ id: "del-b", title: "B" });
+    saveDecision(a);
+    saveDecision(b);
+    const result = deleteDecision("del-a");
+    expect(result).toBe(true);
+    expect(getDecision("del-a")).toBeUndefined();
+  });
+
+  it("refuses to delete when only one decision remains", () => {
+    // Start with demo only
+    getDecisions();
+    const result = deleteDecision(DEMO_DECISION.id);
+    expect(result).toBe(false);
+    expect(getDecisions()).toHaveLength(1);
+  });
+});
+
+describe("resetToDemo", () => {
+  it("restores demo data, removing custom decisions", () => {
+    const custom = makeDecision({ id: "will-be-gone", title: "Gone" });
+    saveDecision(custom);
+    expect(getDecisions().length).toBeGreaterThan(1);
+    resetToDemo();
+    const decs = getDecisions();
+    expect(decs).toHaveLength(1);
+    expect(decs[0].id).toBe(DEMO_DECISION.id);
+  });
+});

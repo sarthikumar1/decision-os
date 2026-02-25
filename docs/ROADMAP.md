@@ -41,9 +41,10 @@
 - [x] Score matrix keyboard grid navigation (arrow keys)
 - [x] Loading skeleton during decision switching
 - [x] Lighthouse CI with performance/accessibility thresholds
+- [x] Decision templates (8 templates: career, purchase, hiring, etc.)
+- [x] Undo/redo support (50-entry history, Ctrl+Z/Ctrl+Shift+Z, toolbar buttons)
+- [x] Component test suite (126 tests across 11 files)
 - [ ] Drag-and-drop reordering for options/criteria
-- [ ] Decision templates (career, purchase, hiring, etc.)
-- [ ] Undo/redo support
 - [ ] Mobile-optimized score matrix (swipe or accordion)
 - [ ] Tooltips for criterion descriptions
 
