@@ -16,11 +16,36 @@ export const metadata: Metadata = {
   title: "Decision OS — Structured Decision-Making Tool",
   description:
     "A structured decision-making tool. Define options, criteria, weights, and scores to find the best choice with sensitivity analysis.",
-  keywords: ["decision making", "weighted scoring", "multi-criteria analysis", "sensitivity analysis"],
+  keywords: [
+    "decision making",
+    "weighted scoring",
+    "multi-criteria analysis",
+    "sensitivity analysis",
+    "decision engine",
+    "productivity",
+  ],
+  metadataBase: new URL("https://decision-os-hazel.vercel.app"),
   openGraph: {
     title: "Decision OS — Structured Decision-Making Tool",
-    description: "Define options, criteria, and scores. See rankings, breakdowns, and sensitivity analysis.",
+    description:
+      "Define options, criteria, and scores. See rankings, breakdowns, and sensitivity analysis.",
+    url: "https://decision-os-hazel.vercel.app",
+    siteName: "Decision OS",
     type: "website",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Decision OS — Structured Decision-Making Tool",
+    description:
+      "Define options, criteria, and scores. See rankings, breakdowns, and sensitivity analysis.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  icons: {
+    icon: "/favicon.ico",
   },
 };
 

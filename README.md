@@ -6,11 +6,12 @@
 
 Define options. Set criteria with weights. Score. See rankings, breakdowns, and sensitivity analysis — all in your browser.
 
-[![CI](https://github.com/decision-os/decision-os/actions/workflows/ci.yml/badge.svg)](https://github.com/decision-os/decision-os/actions)
+[![CI](https://github.com/ericsocrat/decision-os/actions/workflows/ci.yml/badge.svg)](https://github.com/ericsocrat/decision-os/actions)
+[![Deploy](https://img.shields.io/badge/Vercel-deployed-brightgreen?logo=vercel)](https://decision-os-hazel.vercel.app)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](tsconfig.json)
 
-[Live Demo](#) · [Scoring Model](docs/SCORING_MODEL.md) · [Architecture](docs/ARCHITECTURE.md) · [Roadmap](docs/ROADMAP.md)
+[**Live Demo →**](https://decision-os-hazel.vercel.app) · [Scoring Model](docs/SCORING_MODEL.md) · [Architecture](docs/ARCHITECTURE.md) · [Roadmap](docs/ROADMAP.md)
 
 </div>
 
@@ -30,11 +31,21 @@ No accounts. No backend. Everything stays in your browser.
 
 ## Screenshots
 
-<!-- Replace with actual screenshots after deploying -->
+> **To add real screenshots:** Open [https://decision-os-hazel.vercel.app](https://decision-os-hazel.vercel.app), take screenshots of each tab (Builder, Results, Sensitivity), save them as `docs/screenshots/builder.png`, `docs/screenshots/results.png`, `docs/screenshots/sensitivity.png`, and update the paths below.
 
 | Decision Builder | Results | Sensitivity Analysis |
 |:---:|:---:|:---:|
-| ![Builder](https://via.placeholder.com/300x200?text=Decision+Builder) | ![Results](https://via.placeholder.com/300x200?text=Results+View) | ![Sensitivity](https://via.placeholder.com/300x200?text=Sensitivity+Analysis) |
+| ![Builder](docs/screenshots/builder.png) | ![Results](docs/screenshots/results.png) | ![Sensitivity](docs/screenshots/sensitivity.png) |
+
+## 30-Second Demo Walkthrough
+
+1. **Open** [decision-os-hazel.vercel.app](https://decision-os-hazel.vercel.app) — a demo decision loads instantly
+2. **Explore the Builder** — see 3 cities scored across 5 criteria with weights
+3. **Switch to Results** — Austin wins at 6.62; see the per-criterion breakdown
+4. **Check Sensitivity** — discover the winner stays robust across ±25% weight swings
+5. **Edit a score** — change any cell and watch results update in real-time
+6. **Export** — click JSON Export or copy a shareable URL
+7. **Reload the page** — your changes persisted automatically via localStorage
 
 ## Quickstart
 
@@ -45,7 +56,7 @@ No accounts. No backend. Everything stays in your browser.
 ### Install & Run
 
 ```bash
-git clone https://github.com/decision-os/decision-os.git
+git clone https://github.com/ericsocrat/decision-os.git
 cd decision-os
 npm install
 npm run dev
@@ -133,20 +144,25 @@ See [docs/SCORING_MODEL.md](docs/SCORING_MODEL.md) for the full specification wi
 - ✅ **Mobile Friendly** — Responsive design, works on all screen sizes
 - ✅ **No Backend** — Everything runs in your browser (localStorage)
 
-## Deploy on Vercel in 2 Minutes
+## Deployment
 
-1. Push this repo to GitHub
+Decision OS is deployed at **[decision-os-hazel.vercel.app](https://decision-os-hazel.vercel.app)**.
+
+To deploy your own instance:
+
+1. Fork this repository
 2. Go to [vercel.com/new](https://vercel.com/new)
-3. Import your GitHub repository
-4. Click **Deploy** (zero configuration needed)
-5. Your app is live! 🎉
+3. Import your GitHub fork
+4. Click **Deploy** (zero configuration needed — Next.js auto-detected)
+5. Your app is live!
 
-Alternatively, use the Vercel CLI:
+Or via Vercel CLI:
 
 ```bash
-npm i -g vercel
-vercel
+npx vercel --prod
 ```
+
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for the full deployment guide, branch protection setup, and release workflow.
 
 ## Testing
 
@@ -183,9 +199,15 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines. Key rules:
 | [ADRs](docs/DECISIONS/) | Architecture Decision Records |
 | [Copilot Instructions](copilot-instructions.md) | AI agent coding conventions |
 
-## Project Narrative (for LinkedIn Featured)
+## LinkedIn Feature-Ready Pitch
 
-> **I built Decision OS** — an open-source structured decision-making tool that replaces gut-feel choices with data-driven analysis. It implements a deterministic weighted-sum scoring model with sensitivity analysis, all running client-side in the browser. The project demonstrates production engineering practices: TypeScript strict mode, 40+ unit tests, CI/CD pipeline, comprehensive documentation, and clean architecture with a pure scoring engine separated from the UI layer. Built with Next.js, Tailwind CSS, and deployed on Vercel. Try it live or check out the code — every formula is documented, every edge case is tested.
+> **I built Decision OS** — an open-source structured decision-making tool that replaces gut-feel choices with data-driven analysis. It implements a deterministic weighted-sum scoring model with sensitivity analysis, all running client-side in the browser. The project demonstrates production engineering practices: TypeScript strict mode, 40+ unit tests, CI/CD pipeline, comprehensive documentation, and clean architecture with a pure scoring engine separated from the UI layer. Built with Next.js, Tailwind CSS, and deployed on Vercel.
+>
+> **Try it live:** [decision-os-hazel.vercel.app](https://decision-os-hazel.vercel.app)
+>
+> **Source code:** [github.com/ericsocrat/decision-os](https://github.com/ericsocrat/decision-os)
+>
+> Every formula is documented. Every edge case is tested. Every architectural decision has an ADR.
 
 ## License
 

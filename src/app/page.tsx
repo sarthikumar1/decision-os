@@ -94,7 +94,7 @@ function AppContent() {
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-4 text-center text-xs text-gray-500">
           Decision OS v0.1.0 — Open source structured decision-making tool.{" "}
           <a
-            href="https://github.com/decision-os/decision-os"
+            href="https://github.com/ericsocrat/decision-os"
             className="text-blue-600 hover:underline"
             target="_blank"
             rel="noopener noreferrer"
