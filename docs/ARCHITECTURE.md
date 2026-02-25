@@ -32,38 +32,41 @@ Decision OS is a client-side web application built with Next.js (App Router) and
 
 ### `/src/lib/` — Core Logic (Pure, testable, no React)
 
-| File            | Responsibility                                                        |
-| --------------- | --------------------------------------------------------------------- |
-| `types.ts`      | TypeScript type definitions for the entire domain                     |
-| `scoring.ts`    | Deterministic scoring engine (weighted sum, sensitivity analysis)     |
-| `validation.ts` | Input validation with structured error messages + runtime type guards |
-| `storage.ts`    | localStorage CRUD operations                                          |
-| `demo-data.ts`  | Preloaded demo decision                                               |
-| `utils.ts`      | Utilities (ID generation, URL encoding/decoding, relative time)       |
-| `templates.ts`  | 8 pre-built decision templates with `instantiateTemplate()` factory   |
+| File                | Responsibility                                                        |
+| ------------------- | --------------------------------------------------------------------- |
+| `types.ts`          | TypeScript type definitions for the entire domain                     |
+| `scoring.ts`        | Deterministic scoring engine (weighted sum, sensitivity analysis)     |
+| `validation.ts`     | Input validation with structured error messages + runtime type guards |
+| `storage.ts`        | localStorage CRUD operations                                          |
+| `demo-data.ts`      | Preloaded demo decision                                               |
+| `utils.ts`          | Utilities (ID generation, URL encoding/decoding, relative time)       |
+| `templates.ts`      | 8 pre-built decision templates with `instantiateTemplate()` factory   |
+| `import.ts`         | JSON/CSV import parsing, preview, validation, and file reading        |
+| `error-reporter.ts` | Production error telemetry with localStorage + Sentry forwarding      |
 
 ### `/src/components/` — React UI Components
 
-| File                   | Responsibility                                                      |
-| ---------------------- | ------------------------------------------------------------------- |
-| `DecisionProvider.tsx` | React Context for state management, auto-save, URL share restore    |
-| `Header.tsx`           | App header with decision selector, create/delete/reset, dark toggle |
-| `DecisionBuilder.tsx`  | Title, options, criteria, scores matrix editor                      |
-| `ResultsView.tsx`      | Rankings, breakdowns, top drivers, export, chart, share             |
-| `SensitivityView.tsx`  | Weight-swing analysis with interactive slider                       |
-| `ScoreChart.tsx`       | Recharts-based bar and stacked breakdown chart (React.memo, lazy-loaded)  |
-| `ThemeProvider.tsx`    | Dark/light mode via React Context + localStorage                    |
-| `ErrorBoundary.tsx`    | Class-based error boundary with recovery UI                         |
-| `Announcer.tsx`        | Live-region announcer for screen reader CRUD notifications          |
-| `DecisionSkeleton.tsx` | Pulsing placeholder skeleton shown during decision switching        |
-| `Toast.tsx`            | Imperative toast notifications with auto-dismiss and undo actions   |
-| `TemplatePicker.tsx`   | Modal template picker with focus trap and card grid                 |
+| File                   | Responsibility                                                              |
+| ---------------------- | --------------------------------------------------------------------------- |
+| `DecisionProvider.tsx` | React Context for state management, auto-save, URL share restore            |
+| `Header.tsx`           | App header with decision selector, create/delete/reset, dark toggle, import |
+| `DecisionBuilder.tsx`  | Title, options, criteria, scores matrix editor                              |
+| `ResultsView.tsx`      | Rankings, breakdowns, top drivers, export, chart, share                     |
+| `SensitivityView.tsx`  | Weight-swing analysis with interactive slider                               |
+| `ScoreChart.tsx`       | Recharts-based bar and stacked breakdown chart (React.memo, lazy-loaded)    |
+| `ThemeProvider.tsx`    | Dark/light mode via React Context + localStorage                            |
+| `ErrorBoundary.tsx`    | Class-based error boundary with recovery UI and error reporting             |
+| `Announcer.tsx`        | Live-region announcer for screen reader CRUD notifications                  |
+| `DecisionSkeleton.tsx` | Pulsing placeholder skeleton shown during decision switching                |
+| `Toast.tsx`            | Imperative toast notifications with auto-dismiss and undo actions           |
+| `TemplatePicker.tsx`   | Modal template picker with focus trap and card grid                         |
+| `ImportModal.tsx`      | File import dialog with CSV preview, drag-and-drop support                  |
 
 ### `/src/hooks/` — Custom React Hooks
 
-| File               | Responsibility                                                             |
-| ------------------ | -------------------------------------------------------------------------- |
-| `useValidation.ts` | Real-time validation hook — returns errors, warnings, infos for inline UI  |
+| File               | Responsibility                                                            |
+| ------------------ | ------------------------------------------------------------------------- |
+| `useValidation.ts` | Real-time validation hook — returns errors, warnings, infos for inline UI |
 
 ### `/src/app/` — Next.js App Router
 
