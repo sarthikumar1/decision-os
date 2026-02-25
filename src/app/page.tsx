@@ -13,6 +13,7 @@ import { DecisionBuilder } from "@/components/DecisionBuilder";
 import { ResultsView } from "@/components/ResultsView";
 import { SensitivityView } from "@/components/SensitivityView";
 import { Settings2, BarChart3, Activity, Keyboard, X } from "lucide-react";
+import pkg from "../../package.json";
 
 const emptySubscribe = () => () => {};
 function useIsMounted() {
@@ -29,32 +30,29 @@ function AppContent() {
   const [activeTab, setActiveTab] = useState<Tab>("builder");
   const [showShortcuts, setShowShortcuts] = useState(false);
 
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      // Ignore when typing in inputs
-      const tag = (e.target as HTMLElement)?.tagName;
-      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    // Ignore when typing in inputs
+    const tag = (e.target as HTMLElement)?.tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
 
-      switch (e.key) {
-        case "1":
-          setActiveTab("builder");
-          break;
-        case "2":
-          setActiveTab("results");
-          break;
-        case "3":
-          setActiveTab("sensitivity");
-          break;
-        case "?":
-          setShowShortcuts((prev) => !prev);
-          break;
-        case "Escape":
-          setShowShortcuts(false);
-          break;
-      }
-    },
-    []
-  );
+    switch (e.key) {
+      case "1":
+        setActiveTab("builder");
+        break;
+      case "2":
+        setActiveTab("results");
+        break;
+      case "3":
+        setActiveTab("sensitivity");
+        break;
+      case "?":
+        setShowShortcuts((prev) => !prev);
+        break;
+      case "Escape":
+        setShowShortcuts(false);
+        break;
+    }
+  }, []);
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
@@ -77,7 +75,11 @@ function AppContent() {
 
       <main id="main-content" className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-6">
         {/* Tabs */}
-        <nav className="flex border-b border-gray-200 dark:border-gray-700 mb-6" role="tablist" aria-label="Decision sections">
+        <nav
+          className="flex border-b border-gray-200 dark:border-gray-700 mb-6"
+          role="tablist"
+          aria-label="Decision sections"
+        >
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -103,7 +105,9 @@ function AppContent() {
             aria-label="Show keyboard shortcuts"
           >
             <Keyboard className="h-3.5 w-3.5" />
-            <kbd className="rounded border border-gray-300 dark:border-gray-600 px-1 py-0.5 text-[10px] font-mono">?</kbd>
+            <kbd className="rounded border border-gray-300 dark:border-gray-600 px-1 py-0.5 text-[10px] font-mono">
+              ?
+            </kbd>
           </button>
         </nav>
 
@@ -137,7 +141,7 @@ function AppContent() {
       {/* Footer */}
       <footer className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 mt-12 transition-colors">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-4 text-center text-xs text-gray-500 dark:text-gray-400">
-          Decision OS v0.1.0 — Open source structured decision-making tool.{" "}
+          Decision OS v{pkg.version} — Open source structured decision-making tool.{" "}
           <a
             href="https://github.com/ericsocrat/decision-os"
             className="text-blue-600 hover:underline dark:text-blue-400"

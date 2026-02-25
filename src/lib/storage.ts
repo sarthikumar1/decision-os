@@ -13,21 +13,26 @@ const STORAGE_KEY = "decision-os:decisions";
 
 /**
  * Get all saved decisions from localStorage.
- * Returns the demo decision if no decisions exist.
+ * Returns the demo decision if no decisions exist or storage is unavailable.
  */
 export function getDecisions(): Decision[] {
   if (typeof window === "undefined") return [DEMO_DECISION];
 
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) {
-    // Initialize with demo
-    const initial = [DEMO_DECISION];
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
-    return initial;
-  }
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      // Initialize with demo
+      const initial = [DEMO_DECISION];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
+      return initial;
+    }
 
-  const decisions = safeJsonParse<Decision[]>(raw, [DEMO_DECISION]);
-  return decisions.length === 0 ? [DEMO_DECISION] : decisions;
+    const decisions = safeJsonParse<Decision[]>(raw, [DEMO_DECISION]);
+    return decisions.length === 0 ? [DEMO_DECISION] : decisions;
+  } catch {
+    // localStorage unavailable (private browsing, quota exceeded, etc.)
+    return [DEMO_DECISION];
+  }
 }
 
 /**
@@ -43,21 +48,25 @@ export function getDecision(id: string): Decision | undefined {
 export function saveDecision(decision: Decision): void {
   if (typeof window === "undefined") return;
 
-  const decisions = getDecisions();
-  const index = decisions.findIndex((d) => d.id === decision.id);
+  try {
+    const decisions = getDecisions();
+    const index = decisions.findIndex((d) => d.id === decision.id);
 
-  const updated = {
-    ...decision,
-    updatedAt: new Date().toISOString(),
-  };
+    const updated = {
+      ...decision,
+      updatedAt: new Date().toISOString(),
+    };
 
-  if (index >= 0) {
-    decisions[index] = updated;
-  } else {
-    decisions.push(updated);
+    if (index >= 0) {
+      decisions[index] = updated;
+    } else {
+      decisions.push(updated);
+    }
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(decisions));
+  } catch {
+    // localStorage unavailable or quota exceeded — fail silently
   }
-
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(decisions));
 }
 
 /**
@@ -67,12 +76,16 @@ export function saveDecision(decision: Decision): void {
 export function deleteDecision(id: string): boolean {
   if (typeof window === "undefined") return false;
 
-  const decisions = getDecisions();
-  if (decisions.length <= 1) return false;
+  try {
+    const decisions = getDecisions();
+    if (decisions.length <= 1) return false;
 
-  const filtered = decisions.filter((d) => d.id !== id);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
-  return true;
+    const filtered = decisions.filter((d) => d.id !== id);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -80,5 +93,9 @@ export function deleteDecision(id: string): boolean {
  */
 export function resetToDemo(): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify([DEMO_DECISION]));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([DEMO_DECISION]));
+  } catch {
+    // localStorage unavailable — fail silently
+  }
 }

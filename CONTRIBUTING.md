@@ -25,7 +25,7 @@ npm run build     # Production build
 
 - **TypeScript** — strict mode, no `any` types unless justified
 - **Formatting** — Prettier (run `npm run format` before committing)
-- **Linting** — ESLint (run `npm run lint` before committing)  
+- **Linting** — ESLint (run `npm run lint` before committing)
 - **Tests** — All scoring engine changes must include unit tests
 - **Deterministic engine** — Do NOT change the scoring formulas without updating `docs/SCORING_MODEL.md` and all related tests
 - **Accessibility** — All interactive elements must be keyboard-navigable with proper ARIA attributes
@@ -58,6 +58,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for system design.
 ## Scoring Model
 
 See [docs/SCORING_MODEL.md](docs/SCORING_MODEL.md) for the mathematical model. Any changes to scoring logic must:
+
 - Update the documentation
 - Update or add unit tests
 - Maintain deterministic behavior (same inputs → same outputs, always)
@@ -65,6 +66,7 @@ See [docs/SCORING_MODEL.md](docs/SCORING_MODEL.md) for the mathematical model. A
 ## Reporting Issues
 
 Use the GitHub issue templates:
+
 - **Bug Report**: For bugs or unexpected behavior
 - **Feature Request**: For new features or improvements
 

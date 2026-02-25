@@ -13,19 +13,7 @@ export function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
 }
 
-/**
- * Merge class names using clsx + tailwind-merge for dedup.
- */
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
-import {
-  compressToEncodedURIComponent,
-  decompressFromEncodedURIComponent,
-} from "lz-string";
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
+import { compressToEncodedURIComponent, decompressFromEncodedURIComponent } from "lz-string";
 
 /**
  * Safely parse JSON with a fallback value.

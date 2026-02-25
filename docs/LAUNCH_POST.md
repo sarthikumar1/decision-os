@@ -104,6 +104,7 @@ Take screenshots of the live app at https://decision-os-hazel.vercel.app:
 4. **Mobile Screenshot**: The app on a mobile viewport (use browser dev tools responsive mode)
 
 **Tips:**
+
 - Use browser at 1280×800 for desktop screenshots
 - Crop to just the content area (no browser chrome)
 - Export as PNG at 2x for retina clarity

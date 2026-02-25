@@ -15,7 +15,7 @@ export function SensitivityView() {
 
   if (results.optionResults.length === 0) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-gray-50 p-6 text-center text-gray-500">
+      <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-6 text-center text-gray-500 dark:text-gray-400">
         <Activity className="h-8 w-8 mx-auto mb-2 text-gray-400" />
         <p>Add options and criteria to see sensitivity analysis.</p>
       </div>
@@ -29,13 +29,19 @@ export function SensitivityView() {
     <div className="space-y-6">
       {/* Controls */}
       <section aria-labelledby="sensitivity-heading">
-        <h2 id="sensitivity-heading" className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-3">
+        <h2
+          id="sensitivity-heading"
+          className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-3"
+        >
           <Activity className="h-5 w-5 text-purple-600" />
           Sensitivity Analysis
         </h2>
 
         <div className="flex items-center gap-3 mb-4">
-          <label htmlFor="swing-percent" className="text-sm font-medium text-gray-700">
+          <label
+            htmlFor="swing-percent"
+            className="text-sm font-medium text-gray-700 dark:text-gray-300"
+          >
             Weight swing:
           </label>
           <input
@@ -49,7 +55,7 @@ export function SensitivityView() {
             className="w-32 accent-purple-600"
             aria-label="Swing percentage"
           />
-          <span className="text-sm font-medium text-purple-700 min-w-[3rem]">
+          <span className="text-sm font-medium text-purple-700 dark:text-purple-400 min-w-[3rem]">
             ±{swingPercent}%
           </span>
         </div>
@@ -58,8 +64,8 @@ export function SensitivityView() {
         <div
           className={`rounded-lg border p-4 mb-4 ${
             isRobust
-              ? "border-green-200 bg-green-50"
-              : "border-yellow-200 bg-yellow-50"
+              ? "border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/30"
+              : "border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-900/30"
           }`}
           role="status"
         >
@@ -70,10 +76,14 @@ export function SensitivityView() {
               <AlertTriangle className="h-5 w-5 text-yellow-600 shrink-0 mt-0.5" />
             )}
             <div>
-              <p className={`text-sm font-medium ${isRobust ? "text-green-800" : "text-yellow-800"}`}>
+              <p
+                className={`text-sm font-medium ${isRobust ? "text-green-800 dark:text-green-300" : "text-yellow-800 dark:text-yellow-300"}`}
+              >
                 {isRobust ? "Robust Result" : "Sensitive Result"}
               </p>
-              <p className={`text-sm ${isRobust ? "text-green-700" : "text-yellow-700"}`}>
+              <p
+                className={`text-sm ${isRobust ? "text-green-700 dark:text-green-400" : "text-yellow-700 dark:text-yellow-400"}`}
+              >
                 {sensitivity.summary}
               </p>
             </div>
@@ -81,9 +91,12 @@ export function SensitivityView() {
         </div>
 
         {/* Detailed Points */}
-        <div className="rounded-lg border border-gray-200 bg-white overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200" aria-label="Sensitivity analysis details">
-            <thead className="bg-gray-50">
+        <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden">
+          <table
+            className="min-w-full divide-y divide-gray-200 dark:divide-gray-700"
+            aria-label="Sensitivity analysis details"
+          >
+            <thead className="bg-gray-50 dark:bg-gray-900">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Criterion
@@ -102,30 +115,30 @@ export function SensitivityView() {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
               {sensitivity.points.map((point, i) => {
                 const direction = point.adjustedWeight > point.originalWeight ? "↑ Up" : "↓ Down";
                 return (
                   <tr
                     key={`${point.criterionId}-${i}`}
-                    className={point.winnerChanged ? "bg-yellow-50" : ""}
+                    className={point.winnerChanged ? "bg-yellow-50 dark:bg-yellow-900/20" : ""}
                   >
-                    <td className="px-4 py-2 text-sm text-gray-900">
+                    <td className="px-4 py-2 text-sm text-gray-900 dark:text-gray-100">
                       {point.criterionName}
                     </td>
-                    <td className="px-4 py-2 text-sm text-center text-gray-600">
+                    <td className="px-4 py-2 text-sm text-center text-gray-600 dark:text-gray-400">
                       {direction}
                     </td>
-                    <td className="px-4 py-2 text-sm text-center text-gray-600">
+                    <td className="px-4 py-2 text-sm text-center text-gray-600 dark:text-gray-400">
                       {point.originalWeight} → {point.adjustedWeight}
                     </td>
                     <td className="px-4 py-2 text-sm text-center font-medium">
                       {point.winnerChanged ? (
-                        <span className="text-yellow-700">
+                        <span className="text-yellow-700 dark:text-yellow-400">
                           {point.originalWinner} → {point.newWinner}
                         </span>
                       ) : (
-                        <span className="text-gray-700">{point.newWinner}</span>
+                        <span className="text-gray-700 dark:text-gray-300">{point.newWinner}</span>
                       )}
                     </td>
                     <td className="px-4 py-2 text-center">
@@ -149,24 +162,27 @@ export function SensitivityView() {
 
       {/* Explanation */}
       <section aria-labelledby="sensitivity-explain">
-        <h2 id="sensitivity-explain" className="text-lg font-semibold text-gray-900 mb-3">
+        <h2
+          id="sensitivity-explain"
+          className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3"
+        >
           How It Works
         </h2>
-        <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700 space-y-2">
+        <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 text-sm text-gray-700 dark:text-gray-300 space-y-2">
           <p>
-            <strong>Weight Swing Analysis</strong> tests the robustness of your
-            decision. For each criterion, we increase and decrease its weight by
-            ±{swingPercent}% and recompute the rankings.
+            <strong>Weight Swing Analysis</strong> tests the robustness of your decision. For each
+            criterion, we increase and decrease its weight by ±{swingPercent}% and recompute the
+            rankings.
           </p>
           <p>
-            If the winner changes, that criterion is a &quot;sensitive&quot; driver — small
-            shifts in how you value it could flip the outcome. A{" "}
-            <span className="text-green-700 font-medium">robust</span> result
-            means the winner holds even as priorities shift.
+            If the winner changes, that criterion is a &quot;sensitive&quot; driver — small shifts
+            in how you value it could flip the outcome. A{" "}
+            <span className="text-green-700 font-medium">robust</span> result means the winner holds
+            even as priorities shift.
           </p>
           <p>
-            Try adjusting the swing slider to see how different levels of
-            uncertainty affect confidence in your choice.
+            Try adjusting the swing slider to see how different levels of uncertainty affect
+            confidence in your choice.
           </p>
         </div>
       </section>

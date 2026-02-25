@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **E2E assertion mismatch**: New decisions now use "Untitled Decision" matching E2E test expectations (#6)
+- **Shared URL restoration**: Visiting a share link now correctly restores the decision state (#5)
+- **localStorage safety**: All localStorage calls wrapped in try/catch for private browsing compatibility (#16)
+- **Double-rounding in scoring**: Total score now computed from unrounded weighted scores, preventing ranking inversions (#23)
+- **Orphaned types**: `SensitivityAnalysis` and `SensitivityPoint` types now used by scoring engine (#31)
+- **Dark mode FOUC**: Inline script prevents flash of light mode on dark-mode-enabled browsers (#26)
+- **Dark mode coverage**: Full dark mode support across DecisionBuilder, SensitivityView, and ResultsView (#18)
+- **Winner badge dark mode**: Winner badge in ResultsView now visible in dark mode
+- **Option label overflow**: Options beyond Z now use AA, AB, ... labels (#22)
+
+### Added
+
+- **HTTP security headers**: HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy (#20)
+- **CI format:check step**: Prettier formatting enforced in CI pipeline (#30)
+- **Dependabot config**: Automated dependency updates for npm and GitHub Actions (#32)
+- **Coverage thresholds**: V8 coverage with 80% statement/function/line thresholds (#38)
+- **CODEOWNERS file**: Auto-assigns reviewers for PRs (#34)
+- **robots.txt + sitemap.xml**: SEO improvements for search engine indexing (#35)
+- **Dynamic footer version**: Footer version derived from package.json (#39)
+- **Confirmation dialogs**: Delete and reset actions now require user confirmation (#19)
+- **Input limits**: maxLength on text inputs to prevent excessive data (#27)
+
+### Changed
+
+- **next/image for logo**: Logo in header now uses Next.js Image component for optimization (#28)
+- **Removed dead code**: Removed unused `cn()`, `printRef`, `class-variance-authority`, `clsx`, `tailwind-merge` (#15)
+
 ## [0.1.0] - 2026-02-25
 
 ### Added

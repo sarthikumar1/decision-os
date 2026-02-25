@@ -68,11 +68,7 @@ export function validateDecision(decision: Decision): ValidationError[] {
   });
 
   // Scores
-  const scoreErrors = validateScores(
-    decision.scores,
-    decision.options,
-    decision.criteria
-  );
+  const scoreErrors = validateScores(decision.scores, decision.options, decision.criteria);
   errors.push(...scoreErrors);
 
   return errors;
@@ -99,11 +95,7 @@ export function validateCriterion(criterion: Criterion): ValidationError[] {
     errors.push({ field: "name", message: "Criterion name is required." });
   }
 
-  if (
-    !Number.isFinite(criterion.weight) ||
-    criterion.weight < 0 ||
-    criterion.weight > 100
-  ) {
+  if (!Number.isFinite(criterion.weight) || criterion.weight < 0 || criterion.weight > 100) {
     errors.push({
       field: "weight",
       message: "Weight must be between 0 and 100.",

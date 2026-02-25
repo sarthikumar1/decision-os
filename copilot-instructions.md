@@ -7,22 +7,28 @@ Decision OS is a structured decision-making web app. Users create decisions with
 ## Tech Stack
 
 - **Framework**: Next.js 16 (App Router) + TypeScript (strict mode)
-- **Styling**: Tailwind CSS 4 + utility classes
+- **Styling**: Tailwind CSS 4 + utility classes (with `dark:` variants)
 - **Icons**: lucide-react
-- **Testing**: Vitest + React Testing Library
+- **Charts**: Recharts (bar + stacked breakdown)
+- **Compression**: lz-string (URL sharing)
+- **Testing**: Vitest + React Testing Library + Playwright E2E
 - **Linting**: ESLint + Prettier
-- **CI**: GitHub Actions
+- **CI**: GitHub Actions (format:check → lint → typecheck → test:coverage → build → E2E)
+- **Deployment**: Vercel (auto-deploy on push to main)
 
 ## Commands
 
 ```bash
-npm run dev        # Start dev server on localhost:3000
-npm run build      # Production build
-npm run test       # Run all unit tests (Vitest)
-npm run test:watch # Watch mode for tests
-npm run lint       # ESLint check
-npm run typecheck  # TypeScript type check
-npm run format     # Prettier format all files
+npm run dev           # Start dev server on localhost:3000
+npm run build         # Production build
+npm run test          # Run all unit tests (Vitest)
+npm run test:watch    # Watch mode for tests
+npm run test:coverage # Run tests with V8 coverage (enforced thresholds)
+npm run test:e2e      # Run Playwright E2E tests
+npm run lint          # ESLint check
+npm run typecheck     # TypeScript type check
+npm run format        # Prettier format all files
+npm run format:check  # Prettier check (used in CI)
 ```
 
 ## Project Structure
@@ -34,11 +40,14 @@ src/
 │   ├── page.tsx      # Main page (tab navigation)
 │   └── globals.css   # Tailwind imports
 ├── components/       # React components
-│   ├── DecisionProvider.tsx  # State management context
+│   ├── DecisionProvider.tsx  # State management context + URL share restore
 │   ├── DecisionBuilder.tsx   # Decision editor UI
-│   ├── Header.tsx            # App header
-│   ├── ResultsView.tsx       # Rankings & export
-│   └── SensitivityView.tsx   # Sensitivity analysis
+│   ├── Header.tsx            # App header (branding, selector, dark toggle)
+│   ├── ResultsView.tsx       # Rankings, chart, export, share
+│   ├── SensitivityView.tsx   # Sensitivity analysis
+│   ├── ScoreChart.tsx        # Recharts visualization
+│   ├── ThemeProvider.tsx     # Dark/light mode context
+│   └── ErrorBoundary.tsx     # Error boundary with recovery UI
 ├── lib/              # Pure logic (no React)
 │   ├── types.ts      # TypeScript type definitions
 │   ├── scoring.ts    # Scoring engine (CRITICAL - see below)
@@ -88,10 +97,10 @@ Everything in `src/lib/` must be pure functions with no React dependencies. This
 
 ### 6. Styling conventions
 
-- Use Tailwind utility classes
+- Use Tailwind utility classes with `dark:` variants for all new elements
 - No custom CSS unless absolutely necessary
-- Use `cn()` from `src/lib/utils.ts` for conditional classes
 - Mobile-responsive (test on narrow viewports)
+- All user-facing elements must support dark mode
 
 ### 7. State management
 
@@ -118,6 +127,11 @@ Everything in `src/lib/` must be pure functions with no React dependencies. This
 
 1. `npm run test` — all tests pass
 2. `npm run lint` — no lint errors
-3. `npm run typecheck` — no type errors
-4. `npm run build` — production build succeeds
-5. Manual check — app works in browser
+3. `npm run format:check` — formatting correct
+4. `npm run typecheck` — no type errors
+5. `npm run build` — production build succeeds
+6. All `dark:` variants added for any new UI elements
+7. Destructive actions have confirmation dialogs
+8. `npm run typecheck` — no type errors
+9. `npm run build` — production build succeeds
+10. Manual check — app works in browser

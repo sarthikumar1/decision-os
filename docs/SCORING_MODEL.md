@@ -6,15 +6,15 @@ Decision OS uses a **Weighted Sum Model (WSM)** for multi-criteria decision anal
 
 ## Definitions
 
-| Symbol | Definition |
-|--------|-----------|
-| $O$ | Set of options $\{o_1, o_2, \ldots, o_m\}$ |
-| $C$ | Set of criteria $\{c_1, c_2, \ldots, c_n\}$ |
-| $w_i$ | Raw weight for criterion $c_i$ (0–100) |
-| $\hat{w}_i$ | Normalized weight for criterion $c_i$ |
-| $s_{j,i}$ | Raw score for option $o_j$ on criterion $c_i$ (0–10) |
-| $e_{j,i}$ | Effective score (adjusted for criterion type) |
-| $T_j$ | Total weighted score for option $o_j$ |
+| Symbol      | Definition                                           |
+| ----------- | ---------------------------------------------------- |
+| $O$         | Set of options $\{o_1, o_2, \ldots, o_m\}$           |
+| $C$         | Set of criteria $\{c_1, c_2, \ldots, c_n\}$          |
+| $w_i$       | Raw weight for criterion $c_i$ (0–100)               |
+| $\hat{w}_i$ | Normalized weight for criterion $c_i$                |
+| $s_{j,i}$   | Raw score for option $o_j$ on criterion $c_i$ (0–10) |
+| $e_{j,i}$   | Effective score (adjusted for criterion type)        |
+| $T_j$       | Total weighted score for option $o_j$                |
 
 ## Step 1: Normalize Weights
 
@@ -54,27 +54,27 @@ All displayed scores are rounded to **2 decimal places** using JavaScript's `Num
 
 **Decision**: Which laptop to buy?
 
-| Option | Price (cost, w=40) | Performance (benefit, w=35) | Portability (benefit, w=25) |
-|--------|--------------------|-----------------------------|-----------------------------|
-| MacBook Pro | 8 | 9 | 7 |
-| ThinkPad X1 | 5 | 7 | 8 |
+| Option      | Price (cost, w=40) | Performance (benefit, w=35) | Portability (benefit, w=25) |
+| ----------- | ------------------ | --------------------------- | --------------------------- |
+| MacBook Pro | 8                  | 9                           | 7                           |
+| ThinkPad X1 | 5                  | 7                           | 8                           |
 
 ### Step 1: Normalize Weights
 
 Total raw weight = 40 + 35 + 25 = 100
 
-| Criterion | Raw Weight | Normalized |
-|-----------|-----------|------------|
-| Price | 40 | 0.40 |
-| Performance | 35 | 0.35 |
-| Portability | 25 | 0.25 |
+| Criterion   | Raw Weight | Normalized |
+| ----------- | ---------- | ---------- |
+| Price       | 40         | 0.40       |
+| Performance | 35         | 0.35       |
+| Portability | 25         | 0.25       |
 
 ### Step 2: Effective Scores
 
-| Option | Price (cost: 10-s) | Performance | Portability |
-|--------|-------------------|-------------|-------------|
-| MacBook Pro | 10 - 8 = **2** | **9** | **7** |
-| ThinkPad X1 | 10 - 5 = **5** | **7** | **8** |
+| Option      | Price (cost: 10-s) | Performance | Portability |
+| ----------- | ------------------ | ----------- | ----------- |
+| MacBook Pro | 10 - 8 = **2**     | **9**       | **7**       |
+| ThinkPad X1 | 10 - 5 = **5**     | **7**       | **8**       |
 
 ### Step 3: Total Scores
 
@@ -84,10 +84,10 @@ Total raw weight = 40 + 35 + 25 = 100
 
 ### Step 4: Rankings
 
-| Rank | Option | Score |
-|------|--------|-------|
-| 1 | ThinkPad X1 | 6.45 |
-| 2 | MacBook Pro | 5.70 |
+| Rank | Option      | Score |
+| ---- | ----------- | ----- |
+| 1    | ThinkPad X1 | 6.45  |
+| 2    | MacBook Pro | 5.70  |
 
 **Winner: ThinkPad X1** — it scores higher primarily because of better value on Price (the highest-weighted criterion).
 

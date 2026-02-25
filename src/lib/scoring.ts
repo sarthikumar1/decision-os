@@ -19,6 +19,8 @@ import type {
   DecisionResults,
   OptionResult,
   ScoreMatrix,
+  SensitivityAnalysis,
+  SensitivityPoint,
   TopDriver,
 } from "./types";
 
@@ -63,10 +65,7 @@ export function normalizeWeights(weights: number[]): number[] {
  * - benefit: score as-is (clamped 0–10)
  * - cost:    10 - score (inverted so lower cost = higher effective score)
  */
-export function effectiveScore(
-  rawScore: number,
-  criterionType: "benefit" | "cost"
-): number {
+export function effectiveScore(rawScore: number, criterionType: "benefit" | "cost"): number {
   const clamped = Math.max(0, Math.min(MAX_SCORE, rawScore));
   return criterionType === "cost" ? MAX_SCORE - clamped : clamped;
 }
@@ -101,8 +100,13 @@ export function scoreOption(
     };
   });
 
+  // Accumulate from unrounded weighted scores to avoid double-rounding errors
   const totalScore = roundDisplay(
-    criterionScores.reduce((sum, cs) => sum + cs.effectiveScore, 0)
+    criteria.reduce((sum, criterion, i) => {
+      const rawScore = scores[optionId]?.[criterion.id] ?? 0;
+      const eff = effectiveScore(rawScore, criterion.type);
+      return sum + eff * normalizedWeights[i];
+    }, 0)
   );
 
   return {
@@ -163,10 +167,7 @@ export function computeResults(decision: Decision): DecisionResults {
  * Identify the top criteria that most influence the outcome.
  * Returns criteria sorted by weight, with impact descriptions.
  */
-export function computeTopDrivers(
-  criteria: Criterion[],
-  normalizedWeights: number[]
-): TopDriver[] {
+export function computeTopDrivers(criteria: Criterion[], normalizedWeights: number[]): TopDriver[] {
   const indexed = criteria.map((c, i) => ({
     criterion: c,
     nw: normalizedWeights[i],
@@ -199,33 +200,14 @@ export function computeTopDrivers(
 export function sensitivityAnalysis(
   decision: Decision,
   swingPercent: number = 20
-): {
-  points: Array<{
-    criterionId: string;
-    criterionName: string;
-    originalWeight: number;
-    adjustedWeight: number;
-    originalWinner: string;
-    newWinner: string;
-    winnerChanged: boolean;
-  }>;
-  summary: string;
-} {
+): SensitivityAnalysis {
   const baseResults = computeResults(decision);
   if (baseResults.optionResults.length === 0) {
-    return { points: [], summary: "No options to analyze." };
+    return { decisionId: decision.id, points: [], summary: "No options to analyze." };
   }
 
   const originalWinner = baseResults.optionResults[0].optionName;
-  const points: Array<{
-    criterionId: string;
-    criterionName: string;
-    originalWeight: number;
-    adjustedWeight: number;
-    originalWinner: string;
-    newWinner: string;
-    winnerChanged: boolean;
-  }> = [];
+  const points: SensitivityPoint[] = [];
 
   const swingFactor = swingPercent / 100;
 
@@ -235,9 +217,7 @@ export function sensitivityAnalysis(
     const upDecision = applyWeightOverride(decision, criterion.id, upWeight);
     const upResults = computeResults(upDecision);
     const upWinner =
-      upResults.optionResults.length > 0
-        ? upResults.optionResults[0].optionName
-        : originalWinner;
+      upResults.optionResults.length > 0 ? upResults.optionResults[0].optionName : originalWinner;
 
     points.push({
       criterionId: criterion.id,
@@ -251,11 +231,7 @@ export function sensitivityAnalysis(
 
     // Swing DOWN
     const downWeight = Math.max(0, criterion.weight * (1 - swingFactor));
-    const downDecision = applyWeightOverride(
-      decision,
-      criterion.id,
-      downWeight
-    );
+    const downDecision = applyWeightOverride(decision, criterion.id, downWeight);
     const downResults = computeResults(downDecision);
     const downWinner =
       downResults.optionResults.length > 0
@@ -279,7 +255,7 @@ export function sensitivityAnalysis(
       ? `The current winner "${originalWinner}" is robust — no single weight swing of ±${swingPercent}% changes the outcome.`
       : `${changedCount} weight swing(s) out of ${points.length} would change the winner from "${originalWinner}".`;
 
-  return { points, summary };
+  return { decisionId: decision.id, points, summary };
 }
 
 // ---------------------------------------------------------------------------

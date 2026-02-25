@@ -208,11 +208,11 @@ gh release create v<VERSION> \
 
 Decision OS follows [Semantic Versioning](https://semver.org/):
 
-| Change Type | Version Bump | Example |
-|-------------|-------------|---------|
-| Bug fix, docs, refactor | PATCH (0.1.x) | Fix score rounding edge case |
-| New feature, backward-compatible | MINOR (0.x.0) | Add Monte Carlo sensitivity |
-| Breaking change | MAJOR (x.0.0) | Change scoring API signature |
+| Change Type                      | Version Bump  | Example                      |
+| -------------------------------- | ------------- | ---------------------------- |
+| Bug fix, docs, refactor          | PATCH (0.1.x) | Fix score rounding edge case |
+| New feature, backward-compatible | MINOR (0.x.0) | Add Monte Carlo sensitivity  |
+| Breaking change                  | MAJOR (x.0.0) | Change scoring API signature |
 
 ### Current Version
 
@@ -230,9 +230,9 @@ Decision OS requires **no environment variables** for core functionality. It is 
 
 If future features require configuration:
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| (none currently) | — | — |
+| Variable         | Required | Description |
+| ---------------- | -------- | ----------- |
+| (none currently) | —        | —           |
 
 ---
 

@@ -30,7 +30,7 @@ import {
   resetToDemo,
 } from "@/lib/storage";
 import { DEMO_DECISION } from "@/lib/demo-data";
-import { generateId } from "@/lib/utils";
+import { generateId, decodeDecisionFromUrl } from "@/lib/utils";
 
 interface DecisionContextValue {
   // State
@@ -78,8 +78,26 @@ export function useDecision() {
 }
 
 export function DecisionProvider({ children }: { children: ReactNode }) {
-  // Initialize state from localStorage synchronously via lazy initializer
+  // Check URL hash for shared decision data
+  const sharedDecision = (() => {
+    if (typeof window === "undefined") return null;
+    const hash = window.location.hash;
+    if (!hash.startsWith("#data=")) return null;
+    const encoded = hash.slice("#data=".length);
+    if (!encoded) return null;
+    const decoded = decodeDecisionFromUrl<Decision | null>(encoded, null);
+    if (decoded && decoded.id && decoded.title && decoded.options && decoded.criteria) {
+      saveDecision(decoded);
+      // Clean the URL hash without triggering navigation
+      window.history.replaceState(null, "", window.location.pathname);
+      return decoded;
+    }
+    return null;
+  })();
+
+  // Initialize state from shared link or localStorage via lazy initializer
   const [decision, setDecisionState] = useState<Decision>(() => {
+    if (sharedDecision) return sharedDecision;
     if (typeof window === "undefined") return DEMO_DECISION;
     const saved = getDecisions();
     return saved.length > 0 ? saved[0] : DEMO_DECISION;
@@ -130,15 +148,13 @@ export function DecisionProvider({ children }: { children: ReactNode }) {
     const now = new Date().toISOString();
     const newDecision: Decision = {
       id: generateId(),
-      title: "New Decision",
+      title: "Untitled Decision",
       description: "",
       options: [
         { id: generateId(), name: "Option A" },
         { id: generateId(), name: "Option B" },
       ],
-      criteria: [
-        { id: generateId(), name: "Criterion 1", weight: 50, type: "benefit" },
-      ],
+      criteria: [{ id: generateId(), name: "Criterion 1", weight: 50, type: "benefit" }],
       scores: {},
       createdAt: now,
       updatedAt: now,
@@ -194,9 +210,7 @@ export function DecisionProvider({ children }: { children: ReactNode }) {
     (id: string, updates: Partial<Option>) => {
       setDecision({
         ...decision,
-        options: decision.options.map((o) =>
-          o.id === id ? { ...o, ...updates } : o
-        ),
+        options: decision.options.map((o) => (o.id === id ? { ...o, ...updates } : o)),
       });
     },
     [decision, setDecision]
@@ -230,9 +244,7 @@ export function DecisionProvider({ children }: { children: ReactNode }) {
     (id: string, updates: Partial<Criterion>) => {
       setDecision({
         ...decision,
-        criteria: decision.criteria.map((c) =>
-          c.id === id ? { ...c, ...updates } : c
-        ),
+        criteria: decision.criteria.map((c) => (c.id === id ? { ...c, ...updates } : c)),
       });
     },
     [decision, setDecision]
@@ -293,9 +305,5 @@ export function DecisionProvider({ children }: { children: ReactNode }) {
     setSwingPercent,
   };
 
-  return (
-    <DecisionContext.Provider value={value}>
-      {children}
-    </DecisionContext.Provider>
-  );
+  return <DecisionContext.Provider value={value}>{children}</DecisionContext.Provider>;
 }

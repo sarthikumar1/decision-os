@@ -32,7 +32,6 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     if (process.env.NODE_ENV === "development") {
-       
       console.error("ErrorBoundary caught:", error, errorInfo);
     }
   }
@@ -51,9 +50,7 @@ export class ErrorBoundary extends Component<Props, State> {
         <div className="min-h-[300px] flex items-center justify-center p-6">
           <div className="text-center max-w-md">
             <AlertTriangle className="h-10 w-10 text-red-500 mx-auto mb-3" />
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">
-              Something went wrong
-            </h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">Something went wrong</h2>
             <p className="text-sm text-gray-600 mb-4">
               {this.state.error?.message || "An unexpected error occurred."}
             </p>

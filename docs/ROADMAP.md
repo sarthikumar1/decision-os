@@ -16,9 +16,18 @@
 
 ## v0.2.0 — Polish & UX
 
-- [ ] Dark mode
+- [x] Dark mode (full dark theme with FOUC prevention)
+- [x] Charts (Recharts bar + stacked breakdown)
+- [x] URL sharing (lz-string compression with base64 fallback)
+- [x] Keyboard shortcuts (1/2/3 tabs, ? help)
+- [x] PDF export (via window.print)
+- [x] Error boundary with recovery UI
+- [x] Security headers (HSTS, X-Frame-Options, CSP, etc.)
+- [x] Confirmation dialogs on destructive actions
+- [x] Coverage thresholds in CI
+- [x] Dependabot + CODEOWNERS
+- [x] robots.txt + sitemap.xml
 - [ ] Drag-and-drop reordering for options/criteria
-- [ ] Charts (lightweight bar charts for score comparison)
 - [ ] Decision templates (career, purchase, hiring, etc.)
 - [ ] Undo/redo support
 - [ ] Mobile-optimized score matrix (swipe or accordion)

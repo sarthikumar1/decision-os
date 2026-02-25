@@ -31,7 +31,7 @@ If external datasets are added in future versions:
 ## Current External Dependencies
 
 | Dependency | Purpose | License | URL |
-|------------|---------|---------|-----|
-| None | — | — | — |
+| ---------- | ------- | ------- | --- |
+| None       | —       | —       | —   |
 
 The MVP has **zero external data dependencies**. All scoring is done on user-provided inputs.

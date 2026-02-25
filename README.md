@@ -35,8 +35,8 @@ No accounts. No backend. Everything stays in your browser.
 
 > **To add real screenshots:** Open [https://decision-os-hazel.vercel.app](https://decision-os-hazel.vercel.app), take screenshots of each tab (Builder, Results, Sensitivity), save them as `docs/screenshots/builder.png`, `docs/screenshots/results.png`, `docs/screenshots/sensitivity.png`, and update the paths below.
 
-| Decision Builder | Results | Sensitivity Analysis |
-|:---:|:---:|:---:|
+|             Decision Builder             |                 Results                  |               Sensitivity Analysis               |
+| :--------------------------------------: | :--------------------------------------: | :----------------------------------------------: |
 | ![Builder](docs/screenshots/builder.png) | ![Results](docs/screenshots/results.png) | ![Sensitivity](docs/screenshots/sensitivity.png) |
 
 ## 30-Second Demo Walkthrough
@@ -68,29 +68,29 @@ Open [http://localhost:3000](http://localhost:3000) — a demo decision is prelo
 
 ### Commands
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server |
-| `npm run build` | Production build |
-| `npm run start` | Start production server |
-| `npm run test` | Run unit tests (Vitest) |
-| `npm run test:watch` | Run tests in watch mode |
-| `npm run lint` | Lint with ESLint |
-| `npm run typecheck` | TypeScript type checking |
-| `npm run format` | Format with Prettier |
+| Command              | Description              |
+| -------------------- | ------------------------ |
+| `npm run dev`        | Start development server |
+| `npm run build`      | Production build         |
+| `npm run start`      | Start production server  |
+| `npm run test`       | Run unit tests (Vitest)  |
+| `npm run test:watch` | Run tests in watch mode  |
+| `npm run lint`       | Lint with ESLint         |
+| `npm run typecheck`  | TypeScript type checking |
+| `npm run format`     | Format with Prettier     |
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Framework | [Next.js 16](https://nextjs.org/) (App Router) |
-| Language | [TypeScript](https://www.typescriptlang.org/) (strict mode) |
-| Styling | [Tailwind CSS 4](https://tailwindcss.com/) |
-| Icons | [Lucide React](https://lucide.dev/) |
-| Testing | [Vitest](https://vitest.dev/) + React Testing Library |
-| CI/CD | [GitHub Actions](.github/workflows/ci.yml) |
-| Persistence | localStorage (client-side) |
-| Deployment | [Vercel](https://vercel.com/) |
+| Layer       | Technology                                                  |
+| ----------- | ----------------------------------------------------------- |
+| Framework   | [Next.js 16](https://nextjs.org/) (App Router)              |
+| Language    | [TypeScript](https://www.typescriptlang.org/) (strict mode) |
+| Styling     | [Tailwind CSS 4](https://tailwindcss.com/)                  |
+| Icons       | [Lucide React](https://lucide.dev/)                         |
+| Testing     | [Vitest](https://vitest.dev/) + React Testing Library       |
+| CI/CD       | [GitHub Actions](.github/workflows/ci.yml)                  |
+| Persistence | localStorage (client-side)                                  |
+| Deployment  | [Vercel](https://vercel.com/)                               |
 
 ## Architecture
 
@@ -124,10 +124,10 @@ Decision OS uses a **Weighted Sum Model**:
 
 ### Example
 
-| Option | Price (cost, w=40) | Performance (benefit, w=35) | Portability (benefit, w=25) | **Total** |
-|--------|:--:|:--:|:--:|:--:|
-| MacBook Pro | 8 → eff: 2 | 9 | 7 | **5.70** |
-| ThinkPad X1 | 5 → eff: 5 | 7 | 8 | **6.45** ✓ |
+| Option      | Price (cost, w=40) | Performance (benefit, w=35) | Portability (benefit, w=25) | **Total**  |
+| ----------- | :----------------: | :-------------------------: | :-------------------------: | :--------: |
+| MacBook Pro |     8 → eff: 2     |              9              |              7              |  **5.70**  |
+| ThinkPad X1 |     5 → eff: 5     |              7              |              8              | **6.45** ✓ |
 
 See [docs/SCORING_MODEL.md](docs/SCORING_MODEL.md) for the full specification with formulas.
 
@@ -175,6 +175,7 @@ npm run test:coverage  # With coverage report
 ```
 
 Tests cover:
+
 - Weight normalization (including edge cases)
 - Effective score calculation (benefit + cost)
 - Full decision scoring and ranking
@@ -192,14 +193,14 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines. Key rules:
 
 ## Documentation
 
-| Document | Description |
-|----------|-------------|
-| [Architecture](docs/ARCHITECTURE.md) | System design and module boundaries |
-| [Scoring Model](docs/SCORING_MODEL.md) | Mathematical specification with examples |
-| [Data Sources](docs/DATA_SOURCES.md) | Data provenance policy (no scraping) |
-| [Roadmap](docs/ROADMAP.md) | Feature roadmap by version |
-| [ADRs](docs/DECISIONS/) | Architecture Decision Records |
-| [Copilot Instructions](copilot-instructions.md) | AI agent coding conventions |
+| Document                                        | Description                              |
+| ----------------------------------------------- | ---------------------------------------- |
+| [Architecture](docs/ARCHITECTURE.md)            | System design and module boundaries      |
+| [Scoring Model](docs/SCORING_MODEL.md)          | Mathematical specification with examples |
+| [Data Sources](docs/DATA_SOURCES.md)            | Data provenance policy (no scraping)     |
+| [Roadmap](docs/ROADMAP.md)                      | Feature roadmap by version               |
+| [ADRs](docs/DECISIONS/)                         | Architecture Decision Records            |
+| [Copilot Instructions](copilot-instructions.md) | AI agent coding conventions              |
 
 ## LinkedIn Feature-Ready Pitch
 

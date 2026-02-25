@@ -7,14 +7,13 @@
 import { useDecision } from "./DecisionProvider";
 import { ScoreChart } from "./ScoreChart";
 import { Download, Link, Trophy, TrendingUp, BarChart3, FileText } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { encodeDecisionToUrl } from "@/lib/utils";
 import { normalizeWeights } from "@/lib/scoring";
 
 export function ResultsView() {
   const { decision, results } = useDecision();
   const [shareStatus, setShareStatus] = useState<string>("");
-  const printRef = useRef<HTMLDivElement>(null);
 
   if (results.optionResults.length === 0) {
     return (
@@ -76,11 +75,14 @@ export function ResultsView() {
   };
 
   return (
-    <div className="space-y-6" ref={printRef}>
+    <div className="space-y-6">
       {/* Ranking */}
       <section aria-labelledby="ranking-heading">
         <div className="flex items-center justify-between mb-3">
-          <h2 id="ranking-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+          <h2
+            id="ranking-heading"
+            className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2"
+          >
             <Trophy className="h-5 w-5 text-yellow-500" />
             Rankings
           </h2>
@@ -113,7 +115,8 @@ export function ResultsView() {
         </div>
 
         {shareStatus && (
-          <div className={`text-sm mb-3 px-3 py-2 rounded-md ${shareStatus.includes("copied") ? "bg-green-50 text-green-700" : "bg-yellow-50 text-yellow-700"}`}
+          <div
+            className={`text-sm mb-3 px-3 py-2 rounded-md ${shareStatus.includes("copied") ? "bg-green-50 text-green-700" : "bg-yellow-50 text-yellow-700"}`}
             role="status"
           >
             {shareStatus}
@@ -145,9 +148,11 @@ export function ResultsView() {
                     >
                       {r.rank}
                     </span>
-                    <span className="font-medium text-gray-900 dark:text-gray-100">{r.optionName}</span>
+                    <span className="font-medium text-gray-900 dark:text-gray-100">
+                      {r.optionName}
+                    </span>
                     {isWinner && (
-                      <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
+                      <span className="rounded-full bg-blue-100 dark:bg-blue-900 px-2 py-0.5 text-xs font-medium text-blue-800 dark:text-blue-200">
                         Winner
                       </span>
                     )}
@@ -194,7 +199,10 @@ export function ResultsView() {
 
       {/* Score Chart Visualization */}
       <section aria-labelledby="chart-heading" className="print:hidden">
-        <h2 id="chart-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-3">
+        <h2
+          id="chart-heading"
+          className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-3"
+        >
           <BarChart3 className="h-5 w-5 text-blue-600" />
           Score Visualization
         </h2>
@@ -205,7 +213,10 @@ export function ResultsView() {
 
       {/* Top Drivers */}
       <section aria-labelledby="drivers-heading">
-        <h2 id="drivers-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-3">
+        <h2
+          id="drivers-heading"
+          className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-3"
+        >
           <TrendingUp className="h-5 w-5 text-green-600" />
           Top Drivers
         </h2>
@@ -216,11 +227,15 @@ export function ResultsView() {
               <div
                 key={driver.criterionId}
                 className={`flex items-center justify-between p-3 ${
-                  index < results.topDrivers.length - 1 ? "border-b border-gray-100 dark:border-gray-700" : ""
+                  index < results.topDrivers.length - 1
+                    ? "border-b border-gray-100 dark:border-gray-700"
+                    : ""
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{driver.criterionName}</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                    {driver.criterionName}
+                  </span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-32 h-2 rounded-full bg-gray-100 overflow-hidden">
@@ -241,15 +256,18 @@ export function ResultsView() {
 
       {/* Explain Results */}
       <section aria-labelledby="explain-heading">
-        <h2 id="explain-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+        <h2
+          id="explain-heading"
+          className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3"
+        >
           Explain This Result
         </h2>
         <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 text-sm text-gray-700 dark:text-gray-300 space-y-2">
           <p>
-            <strong>How scoring works:</strong> Each criterion&apos;s raw weight is
-            normalized so all weights sum to 100%. For each option, scores (0–10)
-            are multiplied by the normalized weight. Cost criteria are inverted
-            (10 − score) so lower costs yield higher effective scores.
+            <strong>How scoring works:</strong> Each criterion&apos;s raw weight is normalized so
+            all weights sum to 100%. For each option, scores (0–10) are multiplied by the normalized
+            weight. Cost criteria are inverted (10 − score) so lower costs yield higher effective
+            scores.
           </p>
           {results.optionResults.length > 0 && (
             <p>
@@ -257,15 +275,13 @@ export function ResultsView() {
               <span className="text-blue-700 font-medium">
                 {results.optionResults[0].optionName}
               </span>{" "}
-              scored {results.optionResults[0].totalScore.toFixed(2)} out of a
-              maximum of 10.00.
+              scored {results.optionResults[0].totalScore.toFixed(2)} out of a maximum of 10.00.
               {results.optionResults.length > 1 && (
                 <>
-                  {" "}The margin over #{2} (
-                  {results.optionResults[1].optionName}) is{" "}
+                  {" "}
+                  The margin over #{2} ({results.optionResults[1].optionName}) is{" "}
                   {(
-                    results.optionResults[0].totalScore -
-                    results.optionResults[1].totalScore
+                    results.optionResults[0].totalScore - results.optionResults[1].totalScore
                   ).toFixed(2)}{" "}
                   points.
                 </>
@@ -274,9 +290,7 @@ export function ResultsView() {
           )}
           <p>
             <strong>Top driver:</strong>{" "}
-            {results.topDrivers.length > 0
-              ? results.topDrivers[0].impactDescription
-              : "N/A"}
+            {results.topDrivers.length > 0 ? results.topDrivers[0].impactDescription : "N/A"}
           </p>
           <NormalizedWeightsTable />
         </div>
@@ -291,12 +305,12 @@ function NormalizedWeightsTable() {
 
   return (
     <div className="mt-2">
-      <p className="font-medium text-gray-900 mb-1">Normalized Weights:</p>
+      <p className="font-medium text-gray-900 dark:text-gray-100 mb-1">Normalized Weights:</p>
       <div className="flex flex-wrap gap-2">
         {decision.criteria.map((c, i) => (
           <span
             key={c.id}
-            className="inline-flex items-center gap-1 rounded bg-gray-100 px-2 py-1 text-xs"
+            className="inline-flex items-center gap-1 rounded bg-gray-100 dark:bg-gray-700 px-2 py-1 text-xs text-gray-700 dark:text-gray-300"
           >
             {c.name}: <strong>{(nw[i] * 100).toFixed(1)}%</strong>
           </span>

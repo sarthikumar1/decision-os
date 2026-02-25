@@ -100,10 +100,7 @@ export function ScoreChart({ optionResults }: ScoreChartProps) {
               />
               <Bar dataKey="score" radius={[0, 4, 4, 0]} maxBarSize={32}>
                 {totalData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={entry.fill}
-                  />
+                  <Cell key={`cell-${index}`} fill={entry.fill} />
                 ))}
               </Bar>
             </BarChart>
@@ -133,9 +130,7 @@ export function ScoreChart({ optionResults }: ScoreChartProps) {
                 ]}
                 contentStyle={{ fontSize: 12 }}
               />
-              <Legend
-                wrapperStyle={{ fontSize: 11, paddingTop: 8 }}
-              />
+              <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
               {criteriaNames.map((name, i) => (
                 <Bar
                   key={name}
