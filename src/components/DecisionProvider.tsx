@@ -3,7 +3,7 @@
  *
  * Provides:
  * - Current decision state
- * - CRUD operations  
+ * - CRUD operations
  * - Computed results (memoized)
  * - Persistence to localStorage
  */
