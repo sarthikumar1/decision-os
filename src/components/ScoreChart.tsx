@@ -3,11 +3,13 @@
  *
  * Shows total weighted score per option with stacked criterion contributions.
  * Renders client-side only (recharts requires browser DOM).
+ *
+ * Wrapped in React.memo for performance — only re-renders when optionResults change.
  */
 
 "use client";
 
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import {
   BarChart,
   Bar,
@@ -45,7 +47,7 @@ interface ScoreChartProps {
   optionResults: OptionResult[];
 }
 
-export function ScoreChart({ optionResults }: ScoreChartProps) {
+function ScoreChartInner({ optionResults }: ScoreChartProps) {
   // Simple total score bar chart
   const totalData = useMemo(
     () =>
@@ -147,3 +149,5 @@ export function ScoreChart({ optionResults }: ScoreChartProps) {
     </div>
   );
 }
+
+export const ScoreChart = memo(ScoreChartInner);

@@ -1,15 +1,17 @@
 /**
  * Header component with app branding, decision selector, and dark mode toggle.
+ * Wrapped in React.memo — only re-renders when context values change.
  */
 
 "use client";
 
+import { memo } from "react";
 import { useDecision } from "./DecisionProvider";
 import { useTheme } from "./ThemeProvider";
 import { Plus, RotateCcw, Trash2, Sun, Moon } from "lucide-react";
 import Image from "next/image";
 
-export function Header() {
+export const Header = memo(function Header() {
   const { decision, decisions, loadDecision, createNewDecision, removeDecision, resetDemo } =
     useDecision();
   const { theme, toggleTheme } = useTheme();
@@ -108,4 +110,4 @@ export function Header() {
       </div>
     </header>
   );
-}
+});

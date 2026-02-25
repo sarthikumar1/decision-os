@@ -49,6 +49,8 @@ src/
 │   ├── ThemeProvider.tsx     # Dark/light mode context
 │   ├── ErrorBoundary.tsx     # Error boundary with recovery UI
 │   └── Announcer.tsx         # Live-region announcer for screen readers
+├── hooks/            # Custom React hooks
+│   └── useValidation.ts     # Memoized validation (errors/warnings/infos)
 ├── lib/              # Pure logic (no React)
 │   ├── types.ts      # TypeScript type definitions
 │   ├── scoring.ts    # Scoring engine (CRITICAL - see below)
@@ -97,6 +99,9 @@ Everything in `src/lib/` must be pure functions with no React dependencies. This
 - Use `role="tablist"`, `role="tab"`, `role="tabpanel"` for tab interfaces
 - Use `aria-describedby` on inputs that need range/format hints
 - Use `aria-live` regions (via `useAnnounce()`) for dynamic content changes
+- Use `aria-invalid` on inputs with validation errors
+- Use `useValidation()` hook for inline validation feedback in Builder
+- Score matrix grid supports arrow-key navigation (WAI-ARIA grid pattern)
 
 ### 6. Styling conventions
 

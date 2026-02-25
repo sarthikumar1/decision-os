@@ -5,13 +5,29 @@
 "use client";
 
 import { useDecision } from "./DecisionProvider";
-import { ScoreChart } from "./ScoreChart";
-import { Download, Link, Trophy, TrendingUp, BarChart3, FileText } from "lucide-react";
-import { useState } from "react";
+import {
+  Download,
+  Link,
+  Trophy,
+  TrendingUp,
+  BarChart3,
+  FileText,
+  AlertCircle,
+  AlertTriangle,
+} from "lucide-react";
+import { useState, lazy, Suspense } from "react";
 import { encodeDecisionToUrl } from "@/lib/utils";
 import { normalizeWeights } from "@/lib/scoring";
+import type { ValidationResult } from "@/hooks/useValidation";
 
-export function ResultsView() {
+const ScoreChart = lazy(() => import("./ScoreChart").then((m) => ({ default: m.ScoreChart })));
+
+interface ResultsViewProps {
+  validation: ValidationResult;
+  onSwitchToBuilder: () => void;
+}
+
+export function ResultsView({ validation, onSwitchToBuilder }: ResultsViewProps) {
   const { decision, results } = useDecision();
   const [shareStatus, setShareStatus] = useState<string>("");
 
@@ -20,6 +36,33 @@ export function ResultsView() {
       <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-6 text-center text-gray-500 dark:text-gray-400">
         <BarChart3 className="h-8 w-8 mx-auto mb-2 text-gray-400" />
         <p>Add at least 2 options and 1 criterion to see results.</p>
+      </div>
+    );
+  }
+
+  // Validation guard — block results for critical errors
+  if (!validation.isValid) {
+    return (
+      <div className="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-6">
+        <div className="flex items-start gap-3">
+          <AlertCircle className="h-6 w-6 text-red-500 shrink-0 mt-0.5" />
+          <div>
+            <h3 className="text-base font-semibold text-red-800 dark:text-red-300 mb-2">
+              Fix these issues to see results:
+            </h3>
+            <ul className="space-y-1 text-sm text-red-700 dark:text-red-400 list-disc list-inside">
+              {validation.errors.map((err, i) => (
+                <li key={i}>{err.message}</li>
+              ))}
+            </ul>
+            <button
+              onClick={onSwitchToBuilder}
+              className="mt-4 inline-flex items-center gap-1 rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors"
+            >
+              Go to Builder &rarr;
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -76,6 +119,19 @@ export function ResultsView() {
 
   return (
     <div className="space-y-6">
+      {/* Non-blocking validation warnings */}
+      {validation.warnings.length > 0 && (
+        <div className="rounded-lg border border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20 px-4 py-3">
+          <div className="flex items-start gap-2">
+            <AlertTriangle className="h-4 w-4 text-yellow-600 shrink-0 mt-0.5" />
+            <div className="text-sm text-yellow-700 dark:text-yellow-300">
+              <span className="font-medium">Warning:</span>{" "}
+              {validation.warnings.map((w) => w.message).join(". ")}.
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Ranking */}
       <section aria-labelledby="ranking-heading">
         <div className="flex items-center justify-between mb-3">
@@ -207,7 +263,15 @@ export function ResultsView() {
           Score Visualization
         </h2>
         <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
-          <ScoreChart optionResults={results.optionResults} />
+          <Suspense
+            fallback={
+              <div className="h-[200px] flex items-center justify-center text-sm text-gray-400">
+                Loading chart…
+              </div>
+            }
+          >
+            <ScoreChart optionResults={results.optionResults} />
+          </Suspense>
         </div>
       </section>
 

@@ -7,12 +7,14 @@
 
 import { useState, useEffect, useCallback, useRef, useSyncExternalStore } from "react";
 import { AnnouncerProvider, useAnnounce } from "@/components/Announcer";
-import { DecisionProvider } from "@/components/DecisionProvider";
+import { DecisionProvider, useDecision } from "@/components/DecisionProvider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Header } from "@/components/Header";
 import { DecisionBuilder } from "@/components/DecisionBuilder";
 import { ResultsView } from "@/components/ResultsView";
 import { SensitivityView } from "@/components/SensitivityView";
+import { DecisionSkeleton } from "@/components/DecisionSkeleton";
+import { useValidation } from "@/hooks/useValidation";
 import { Settings2, BarChart3, Activity, Keyboard, X } from "lucide-react";
 import pkg from "../../package.json";
 
@@ -41,6 +43,8 @@ function AppContent() {
   const shortcutTriggerRef = useRef<HTMLButtonElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const announce = useAnnounce();
+  const { decision, isLoading } = useDecision();
+  const validation = useValidation(decision);
 
   // Focus the active tab button after tab change via arrow keys
   const activateTab = useCallback(
@@ -75,7 +79,7 @@ function AppContent() {
           break;
       }
     },
-    [activeTab, activateTab],
+    [activeTab, activateTab]
   );
 
   // Restore focus to trigger element when modal closes
@@ -112,7 +116,7 @@ function AppContent() {
           break;
       }
     },
-    [closeModal, announce],
+    [closeModal, announce]
   );
 
   useEffect(() => {
@@ -133,7 +137,7 @@ function AppContent() {
     const handleTrap = (e: KeyboardEvent) => {
       if (e.key !== "Tab") return;
       const focusable = modal.querySelectorAll<HTMLElement>(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
       );
       if (focusable.length === 0) return;
       const first = focusable[0];
@@ -190,6 +194,11 @@ function AppContent() {
             >
               {tab.icon}
               {tab.label}
+              {tab.id === "builder" && validation.errorCount > 0 && (
+                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white px-1">
+                  {validation.errorCount}
+                </span>
+              )}
             </button>
           ))}
 
@@ -214,7 +223,7 @@ function AppContent() {
           aria-labelledby="tab-builder"
           className={activeTab === "builder" ? "" : "hidden"}
         >
-          <DecisionBuilder />
+          {isLoading ? <DecisionSkeleton /> : <DecisionBuilder validation={validation} />}
         </div>
         <div
           id="panel-results"
@@ -222,7 +231,7 @@ function AppContent() {
           aria-labelledby="tab-results"
           className={activeTab === "results" ? "" : "hidden"}
         >
-          <ResultsView />
+          <ResultsView validation={validation} onSwitchToBuilder={() => setActiveTab("builder")} />
         </div>
         <div
           id="panel-sensitivity"

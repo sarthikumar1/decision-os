@@ -41,6 +41,7 @@ interface DecisionContextValue {
   results: ReturnType<typeof computeResults>;
   sensitivity: ReturnType<typeof sensitivityAnalysis>;
   isDirty: boolean;
+  isLoading: boolean;
 
   // Decision CRUD
   setDecision: (d: Decision) => void;
@@ -109,6 +110,7 @@ export function DecisionProvider({ children }: { children: ReactNode }) {
     return getDecisions();
   });
   const [isDirty, setIsDirty] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [swingPercent, setSwingPercent] = useState(20);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const announce = useAnnounce();
@@ -144,9 +146,12 @@ export function DecisionProvider({ children }: { children: ReactNode }) {
     (id: string) => {
       const d = getDecision(id);
       if (d) {
+        setIsLoading(true);
         setDecisionState(d);
         setIsDirty(false);
         announce(`Loaded decision: ${d.title}`);
+        // Brief loading skeleton for visual feedback
+        requestAnimationFrame(() => setIsLoading(false));
       }
     },
     [announce]
@@ -305,6 +310,7 @@ export function DecisionProvider({ children }: { children: ReactNode }) {
     results,
     sensitivity,
     isDirty,
+    isLoading,
     setDecision,
     loadDecision,
     createNewDecision,

@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Automated a11y testing**: axe-core Playwright E2E tests scan Builder, Results, Sensitivity, shortcuts modal, dark mode, and new decisions for WCAG 2.1 AA violations (#42)
+- **Real-time validation feedback**: `useValidation` hook surfaces errors/warnings/infos inline in Builder; red badge on Builder tab shows error count; Results tab shows guard for blocking errors and yellow banner for warnings (#9)
+- **Lazy-loaded ScoreChart**: Recharts component lazy-loaded via `React.lazy` + `Suspense` to reduce initial bundle size (#13)
+- **React.memo on Header & ScoreChart**: Prevents unnecessary re-renders when parent state changes (#13)
+- **Keyboard grid navigation**: Arrow keys navigate the score matrix cells; arrow up/down/left/right moves focus between inputs with auto-select (#25)
+- **Loading skeleton**: Pulsing placeholder skeleton shown during decision switching for smoother transitions (#45)
+- **Lighthouse CI**: `lighthouserc.json` config with performance ≥ 85, accessibility ≥ 90 thresholds; new CI job runs 3 Lighthouse audits per deploy (#44)
+
 ### Fixed
 
 - **ARIA tab-panel linkage**: Tab buttons now have proper `id` attributes matching `aria-labelledby` on panels; roving tabindex with arrow-key + Home/End navigation (#17)

@@ -50,10 +50,17 @@ Decision OS is a client-side web application built with Next.js (App Router) and
 | `DecisionBuilder.tsx`  | Title, options, criteria, scores matrix editor                      |
 | `ResultsView.tsx`      | Rankings, breakdowns, top drivers, export, chart, share             |
 | `SensitivityView.tsx`  | Weight-swing analysis with interactive slider                       |
-| `ScoreChart.tsx`       | Recharts-based bar and stacked breakdown chart                      |
+| `ScoreChart.tsx`       | Recharts-based bar and stacked breakdown chart (React.memo, lazy-loaded)  |
 | `ThemeProvider.tsx`    | Dark/light mode via React Context + localStorage                    |
 | `ErrorBoundary.tsx`    | Class-based error boundary with recovery UI                         |
 | `Announcer.tsx`        | Live-region announcer for screen reader CRUD notifications          |
+| `DecisionSkeleton.tsx` | Pulsing placeholder skeleton shown during decision switching        |
+
+### `/src/hooks/` — Custom React Hooks
+
+| File               | Responsibility                                                             |
+| ------------------ | -------------------------------------------------------------------------- |
+| `useValidation.ts` | Real-time validation hook — returns errors, warnings, infos for inline UI  |
 
 ### `/src/app/` — Next.js App Router
 
@@ -73,13 +80,15 @@ Decision OS is a client-side web application built with Next.js (App Router) and
 
 3. **React Context over Redux**: For an app this size, Context + `useState` is simpler and sufficient. No unnecessary abstractions.
 
-4. **Recharts for visualization**: Score comparison uses Recharts bar charts. Adds ~45KB gzipped but provides responsive, accessible charts with minimal custom code.
+4. **Recharts for visualization**: Score comparison uses Recharts bar charts. Lazy-loaded via `React.lazy` + `Suspense` to keep initial bundle small. Adds ~45KB gzipped but provides responsive, accessible charts with minimal custom code.
 
 5. **Single-page app**: All functionality on one page with tabs. Reduces complexity and keeps the UX focused.
 
 6. **Security headers**: HTTP security headers (HSTS, X-Frame-Options, CSP, etc.) configured in `next.config.ts`.
 
 7. **Dark mode**: System-preference-aware with localStorage persistence. FOUC prevented via inline `<script>` in layout.
+
+8. **Inline validation**: `useValidation` hook provides memoized real-time feedback (errors, warnings, infos) without blocking save. Builder shows inline borders/messages; Results tab shows a guard for critical errors and a warning banner for non-blocking issues.
 
 ## Data Flow
 

@@ -35,6 +35,12 @@
 - [x] Decision timestamps (created/updated) with relative time display
 - [x] Print stylesheet (all panels visible, clean layout)
 - [x] Cross-browser E2E testing (Chromium + Firefox + WebKit)
+- [x] Automated axe-core accessibility testing in E2E suite
+- [x] Real-time validation feedback (inline errors/warnings in Builder, badge, Results guard)
+- [x] Lazy-loaded ScoreChart + React.memo for performance
+- [x] Score matrix keyboard grid navigation (arrow keys)
+- [x] Loading skeleton during decision switching
+- [x] Lighthouse CI with performance/accessibility thresholds
 - [ ] Drag-and-drop reordering for options/criteria
 - [ ] Decision templates (career, purchase, hiring, etc.)
 - [ ] Undo/redo support
