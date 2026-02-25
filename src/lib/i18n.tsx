@@ -63,6 +63,7 @@ const en = {
     resetDemo: "Reset Demo",
     selectDecision: "Select decision",
     switchTheme: "Switch to {mode} mode",
+    importDecision: "Import",
   },
   shortcuts: {
     title: "Keyboard Shortcuts",

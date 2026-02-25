@@ -8,9 +8,10 @@
 import { memo, useState } from "react";
 import { useDecision } from "./DecisionProvider";
 import { useTheme } from "./ThemeProvider";
-import { Plus, RotateCcw, Trash2, Sun, Moon, LayoutTemplate } from "lucide-react";
+import { Plus, RotateCcw, Trash2, Sun, Moon, LayoutTemplate, Upload } from "lucide-react";
 import Image from "next/image";
 import { TemplatePicker, instantiateTemplate } from "./TemplatePicker";
+import { ImportModal } from "./ImportModal";
 import type { DecisionTemplate } from "@/lib/templates";
 import { saveDecision } from "@/lib/storage";
 
@@ -19,6 +20,7 @@ export const Header = memo(function Header() {
     useDecision();
   const { theme, toggleTheme } = useTheme();
   const [showTemplates, setShowTemplates] = useState(false);
+  const [showImport, setShowImport] = useState(false);
 
   const handleTemplateSelect = (template: DecisionTemplate) => {
     const newDecision = instantiateTemplate(template);
@@ -85,6 +87,15 @@ export const Header = memo(function Header() {
               <span className="hidden sm:inline">Templates</span>
             </button>
 
+            <button
+              onClick={() => setShowImport(true)}
+              className="inline-flex items-center gap-1 rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+              aria-label="Import decision from file"
+            >
+              <Upload className="h-4 w-4" />
+              <span className="hidden sm:inline">Import</span>
+            </button>
+
             {decisions.length > 1 && (
               <button
                 onClick={() => {
@@ -136,6 +147,9 @@ export const Header = memo(function Header() {
           onClose={() => setShowTemplates(false)}
         />
       )}
+
+      {/* Import Modal */}
+      {showImport && <ImportModal onClose={() => setShowImport(false)} />}
     </header>
   );
 });

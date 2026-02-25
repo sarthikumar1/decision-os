@@ -14,9 +14,12 @@ import { DecisionBuilder } from "@/components/DecisionBuilder";
 import { ResultsView } from "@/components/ResultsView";
 import { SensitivityView } from "@/components/SensitivityView";
 import { DecisionSkeleton } from "@/components/DecisionSkeleton";
+import { ImportModal } from "@/components/ImportModal";
 import { useValidation } from "@/hooks/useValidation";
-import { Settings2, BarChart3, Activity, Keyboard, X } from "lucide-react";
-import { ToastProvider } from "@/components/Toast";
+import { Settings2, BarChart3, Activity, Keyboard, X, Upload } from "lucide-react";
+import { ToastProvider, showToast } from "@/components/Toast";
+import { validateFile, readFileAsText, importFromJson } from "@/lib/import";
+import { saveDecision } from "@/lib/storage";
 import pkg from "../../package.json";
 
 const emptySubscribe = () => () => {};
@@ -44,8 +47,85 @@ function AppContent() {
   const shortcutTriggerRef = useRef<HTMLButtonElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const announce = useAnnounce();
-  const { decision, isLoading, undo, redo } = useDecision();
+  const { decision, isLoading, undo, redo, loadDecision } = useDecision();
   const validation = useValidation(decision);
+
+  // ── Global drag-and-drop for file import ──────────────────
+  const [showDropOverlay, setShowDropOverlay] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const dropCounter = useRef(0);
+
+  const handleGlobalDragEnter = useCallback((e: DragEvent) => {
+    e.preventDefault();
+    dropCounter.current++;
+    if (e.dataTransfer?.types.includes("Files")) {
+      setShowDropOverlay(true);
+    }
+  }, []);
+
+  const handleGlobalDragLeave = useCallback((e: DragEvent) => {
+    e.preventDefault();
+    dropCounter.current--;
+    if (dropCounter.current === 0) {
+      setShowDropOverlay(false);
+    }
+  }, []);
+
+  const handleGlobalDragOver = useCallback((e: DragEvent) => {
+    e.preventDefault();
+  }, []);
+
+  const handleGlobalDrop = useCallback(
+    async (e: DragEvent) => {
+      e.preventDefault();
+      setShowDropOverlay(false);
+      dropCounter.current = 0;
+      const file = e.dataTransfer?.files[0];
+      if (!file) return;
+
+      const ext = file.name.toLowerCase().slice(file.name.lastIndexOf("."));
+      const fileErrors = validateFile(file);
+      if (fileErrors.length > 0) {
+        showToast({ text: fileErrors[0].message });
+        return;
+      }
+
+      if (ext === ".csv") {
+        // CSV needs preview — open import modal
+        setShowImportModal(true);
+        return;
+      }
+
+      // JSON — import directly
+      try {
+        const content = await readFileAsText(file);
+        const result = importFromJson(content);
+        if (result.success && result.decision) {
+          saveDecision(result.decision);
+          loadDecision(result.decision.id);
+          showToast({ text: `Imported "${result.decision.title}" successfully!` });
+        } else {
+          showToast({ text: result.errors[0]?.message || "Import failed." });
+        }
+      } catch {
+        showToast({ text: "Failed to read file." });
+      }
+    },
+    [loadDecision],
+  );
+
+  useEffect(() => {
+    window.addEventListener("dragenter", handleGlobalDragEnter);
+    window.addEventListener("dragleave", handleGlobalDragLeave);
+    window.addEventListener("dragover", handleGlobalDragOver);
+    window.addEventListener("drop", handleGlobalDrop);
+    return () => {
+      window.removeEventListener("dragenter", handleGlobalDragEnter);
+      window.removeEventListener("dragleave", handleGlobalDragLeave);
+      window.removeEventListener("dragover", handleGlobalDragOver);
+      window.removeEventListener("drop", handleGlobalDrop);
+    };
+  }, [handleGlobalDragEnter, handleGlobalDragLeave, handleGlobalDragOver, handleGlobalDrop]);
 
   // Focus the active tab button after tab change via arrow keys
   const activateTab = useCallback(
@@ -326,6 +406,22 @@ function AppContent() {
           </div>
         </div>
       )}
+
+      {/* Global drag-and-drop overlay */}
+      {showDropOverlay && (
+        <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-blue-600/10 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-3 rounded-2xl border-4 border-dashed border-blue-500 bg-white/90 px-12 py-10 shadow-2xl dark:bg-gray-800/90">
+            <Upload className="h-12 w-12 text-blue-500" />
+            <p className="text-lg font-semibold text-blue-700 dark:text-blue-300">
+              Drop file to import decision
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">JSON or CSV</p>
+          </div>
+        </div>
+      )}
+
+      {/* Import modal (for CSV drop) */}
+      {showImportModal && <ImportModal onClose={() => setShowImportModal(false)} />}
     </div>
   );
 }
