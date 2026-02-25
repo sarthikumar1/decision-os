@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { screen, within } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { renderWithProviders } from "../test-utils";
 import { Header } from "@/components/Header";
 

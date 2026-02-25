@@ -9,8 +9,6 @@ import { DecisionProvider, useDecision } from "@/components/DecisionProvider";
 import { AnnouncerProvider } from "@/components/Announcer";
 import { DEMO_DECISION } from "@/lib/demo-data";
 
-const STORAGE_KEY = "decision-os:decisions";
-
 function wrapper({ children }: { children: ReactNode }) {
   return (
     <AnnouncerProvider>

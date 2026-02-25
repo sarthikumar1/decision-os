@@ -44,7 +44,7 @@ function AppContent() {
   const shortcutTriggerRef = useRef<HTMLButtonElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const announce = useAnnounce();
-  const { decision, isLoading, undo, redo, canUndo, canRedo } = useDecision();
+  const { decision, isLoading, undo, redo } = useDecision();
   const validation = useValidation(decision);
 
   // Focus the active tab button after tab change via arrow keys
