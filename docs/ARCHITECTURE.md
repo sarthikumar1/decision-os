@@ -32,14 +32,14 @@ Decision OS is a client-side web application built with Next.js (App Router) and
 
 ### `/src/lib/` — Core Logic (Pure, testable, no React)
 
-| File            | Responsibility                                                    |
-| --------------- | ----------------------------------------------------------------- |
-| `types.ts`      | TypeScript type definitions for the entire domain                 |
-| `scoring.ts`    | Deterministic scoring engine (weighted sum, sensitivity analysis) |
-| `validation.ts` | Input validation with structured error messages                   |
-| `storage.ts`    | localStorage CRUD operations                                      |
-| `demo-data.ts`  | Preloaded demo decision                                           |
-| `utils.ts`      | Utilities (ID generation, URL encoding/decoding)                  |
+| File            | Responsibility                                                        |
+| --------------- | --------------------------------------------------------------------- |
+| `types.ts`      | TypeScript type definitions for the entire domain                     |
+| `scoring.ts`    | Deterministic scoring engine (weighted sum, sensitivity analysis)     |
+| `validation.ts` | Input validation with structured error messages + runtime type guards |
+| `storage.ts`    | localStorage CRUD operations                                          |
+| `demo-data.ts`  | Preloaded demo decision                                               |
+| `utils.ts`      | Utilities (ID generation, URL encoding/decoding, relative time)       |
 
 ### `/src/components/` — React UI Components
 
@@ -53,6 +53,7 @@ Decision OS is a client-side web application built with Next.js (App Router) and
 | `ScoreChart.tsx`       | Recharts-based bar and stacked breakdown chart                      |
 | `ThemeProvider.tsx`    | Dark/light mode via React Context + localStorage                    |
 | `ErrorBoundary.tsx`    | Class-based error boundary with recovery UI                         |
+| `Announcer.tsx`        | Live-region announcer for screen reader CRUD notifications          |
 
 ### `/src/app/` — Next.js App Router
 
@@ -60,6 +61,7 @@ Decision OS is a client-side web application built with Next.js (App Router) and
 | ------------- | -------------------------------------------------------- |
 | `layout.tsx`  | Root layout with metadata, fonts, FOUC-prevention script |
 | `page.tsx`    | Main page with tab navigation, keyboard shortcuts        |
+| `manifest.ts` | PWA web app manifest (name, icons, theme)                |
 | `sitemap.ts`  | Dynamic sitemap generation for SEO                       |
 | `globals.css` | Tailwind imports and CSS variables                       |
 
@@ -92,4 +94,3 @@ User Input → DecisionProvider → Scoring Engine → Results
 
 - **Supabase backend**: Behind a feature flag for cloud persistence
 - **Web Workers**: Move scoring to a worker for large decisions
-- **PWA**: Offline support via service worker

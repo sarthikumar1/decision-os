@@ -166,11 +166,81 @@ body {
 
 /* Print styles */
 @media print {
-  .no-print {
+  .no-print,
+  nav[role="tablist"],
+  footer,
+  .skip-link,
+  button,
+  [role="dialog"],
+  [aria-live] {
     display: none !important;
   }
+
+  /* Force light palette */
+  html,
   body {
-    background: white;
-    color: black;
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+  }
+
+  /* Remove dark-mode backgrounds/borders */
+  * {
+    color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Remove background decorations */
+  .bg-gray-50,
+  .bg-gray-100,
+  .bg-white,
+  .dark .bg-gray-50,
+  .dark .bg-white,
+  .dark .bg-gray-800,
+  .dark .bg-gray-900 {
+    background: white !important;
+  }
+
+  /* Show all tab panels (hidden tabs become visible in print) */
+  [role="tabpanel"] {
+    display: block !important;
+  }
+
+  /* Avoid breaking inside cards & tables */
+  section,
+  table,
+  tr {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Print header with decision info */
+  main {
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+
+  /* Ensure tables fill width */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  th,
+  td {
+    border: 1px solid #ccc;
+    padding: 4px 8px;
+  }
+
+  /* Link URLs in print */
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #555;
+  }
+  a[href^="#"]::after,
+  a[href^="javascript:"]::after {
+    content: "";
   }
 }

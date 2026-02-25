@@ -31,6 +31,8 @@ import {
 } from "@/lib/storage";
 import { DEMO_DECISION } from "@/lib/demo-data";
 import { generateId, decodeDecisionFromUrl } from "@/lib/utils";
+import { isDecision } from "@/lib/validation";
+import { useAnnounce } from "@/components/Announcer";
 
 interface DecisionContextValue {
   // State
@@ -85,8 +87,8 @@ export function DecisionProvider({ children }: { children: ReactNode }) {
     if (!hash.startsWith("#data=")) return null;
     const encoded = hash.slice("#data=".length);
     if (!encoded) return null;
-    const decoded = decodeDecisionFromUrl<Decision | null>(encoded, null);
-    if (decoded && decoded.id && decoded.title && decoded.options && decoded.criteria) {
+    const decoded = decodeDecisionFromUrl<unknown>(encoded, null);
+    if (isDecision(decoded)) {
       saveDecision(decoded);
       // Clean the URL hash without triggering navigation
       window.history.replaceState(null, "", window.location.pathname);
@@ -109,6 +111,7 @@ export function DecisionProvider({ children }: { children: ReactNode }) {
   const [isDirty, setIsDirty] = useState(false);
   const [swingPercent, setSwingPercent] = useState(20);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const announce = useAnnounce();
 
   // Auto-save on decision change (debounced)
   useEffect(() => {
@@ -118,11 +121,12 @@ export function DecisionProvider({ children }: { children: ReactNode }) {
       saveDecision(decision);
       setDecisions(getDecisions());
       setIsDirty(false);
+      announce("Changes saved");
     }, 300);
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
-  }, [decision, isDirty]);
+  }, [decision, isDirty, announce]);
 
   // Memoized results
   const results = useMemo(() => computeResults(decision), [decision]);
@@ -132,17 +136,21 @@ export function DecisionProvider({ children }: { children: ReactNode }) {
   );
 
   const setDecision = useCallback((d: Decision) => {
-    setDecisionState(d);
+    setDecisionState({ ...d, updatedAt: new Date().toISOString() });
     setIsDirty(true);
   }, []);
 
-  const loadDecision = useCallback((id: string) => {
-    const d = getDecision(id);
-    if (d) {
-      setDecisionState(d);
-      setIsDirty(false);
-    }
-  }, []);
+  const loadDecision = useCallback(
+    (id: string) => {
+      const d = getDecision(id);
+      if (d) {
+        setDecisionState(d);
+        setIsDirty(false);
+        announce(`Loaded decision: ${d.title}`);
+      }
+    },
+    [announce]
+  );
 
   const createNewDecision = useCallback(() => {
     const now = new Date().toISOString();
@@ -163,7 +171,8 @@ export function DecisionProvider({ children }: { children: ReactNode }) {
     setDecisionState(newDecision);
     setDecisions(getDecisions());
     setIsDirty(false);
-  }, []);
+    announce("New decision created");
+  }, [announce]);
 
   const removeDecision = useCallback(
     (id: string) => {
@@ -173,9 +182,10 @@ export function DecisionProvider({ children }: { children: ReactNode }) {
         if (decision.id === id && remaining.length > 0) {
           setDecisionState(remaining[0]);
         }
+        announce("Decision deleted");
       }
     },
-    [decision.id]
+    [decision.id, announce]
   );
 
   const resetDemoFn = useCallback(() => {
@@ -184,7 +194,8 @@ export function DecisionProvider({ children }: { children: ReactNode }) {
     setDecisions(saved);
     setDecisionState(saved[0]);
     setIsDirty(false);
-  }, []);
+    announce("Demo data restored");
+  }, [announce]);
 
   // Field updates
   const updateTitle = useCallback(
@@ -204,7 +215,8 @@ export function DecisionProvider({ children }: { children: ReactNode }) {
       name: `Option ${decision.options.length + 1}`,
     };
     setDecision({ ...decision, options: [...decision.options, newOpt] });
-  }, [decision, setDecision]);
+    announce(`Option ${decision.options.length + 1} added`);
+  }, [decision, setDecision, announce]);
 
   const updateOption = useCallback(
     (id: string, updates: Partial<Option>) => {
@@ -218,6 +230,7 @@ export function DecisionProvider({ children }: { children: ReactNode }) {
 
   const removeOption = useCallback(
     (id: string) => {
+      const removed = decision.options.find((o) => o.id === id);
       const newScores = { ...decision.scores };
       delete newScores[id];
       setDecision({
@@ -225,8 +238,9 @@ export function DecisionProvider({ children }: { children: ReactNode }) {
         options: decision.options.filter((o) => o.id !== id),
         scores: newScores,
       });
+      announce(`${removed?.name ?? "Option"} removed`);
     },
-    [decision, setDecision]
+    [decision, setDecision, announce]
   );
 
   // Criteria
@@ -238,7 +252,8 @@ export function DecisionProvider({ children }: { children: ReactNode }) {
       type: "benefit",
     };
     setDecision({ ...decision, criteria: [...decision.criteria, newCrit] });
-  }, [decision, setDecision]);
+    announce(`Criterion ${decision.criteria.length + 1} added`);
+  }, [decision, setDecision, announce]);
 
   const updateCriterion = useCallback(
     (id: string, updates: Partial<Criterion>) => {
@@ -252,6 +267,7 @@ export function DecisionProvider({ children }: { children: ReactNode }) {
 
   const removeCriterion = useCallback(
     (id: string) => {
+      const removed = decision.criteria.find((c) => c.id === id);
       const newScores: ScoreMatrix = {};
       for (const optId of Object.keys(decision.scores)) {
         const optScores = { ...decision.scores[optId] };
@@ -263,18 +279,20 @@ export function DecisionProvider({ children }: { children: ReactNode }) {
         criteria: decision.criteria.filter((c) => c.id !== id),
         scores: newScores,
       });
+      announce(`${removed?.name ?? "Criterion"} removed`);
     },
-    [decision, setDecision]
+    [decision, setDecision, announce]
   );
 
   // Scores
   const updateScore = useCallback(
     (optionId: string, criterionId: string, value: number) => {
+      const clamped = Math.max(0, Math.min(10, Math.round(value)));
       const newScores = { ...decision.scores };
       if (!newScores[optionId]) newScores[optionId] = {};
       newScores[optionId] = {
         ...newScores[optionId],
-        [criterionId]: value,
+        [criterionId]: clamped,
       };
       setDecision({ ...decision, scores: newScores });
     },

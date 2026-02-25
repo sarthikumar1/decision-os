@@ -3,6 +3,7 @@
  *
  * All user input goes through these validators before being saved.
  * Returns structured error messages for UI display.
+ * Also includes runtime type guards for localStorage/URL data integrity.
  */
 
 import type { Criterion, Decision, Option, ScoreMatrix } from "./types";
@@ -12,6 +13,61 @@ export interface ValidationError {
   field: string;
   message: string;
 }
+
+// ─── Runtime Type Guards ───────────────────────────────────────────
+
+/**
+ * Runtime type guard: checks if a value is a valid Option.
+ */
+export function isOption(data: unknown): data is Option {
+  if (typeof data !== "object" || data === null) return false;
+  const o = data as Record<string, unknown>;
+  return typeof o.id === "string" && typeof o.name === "string";
+}
+
+/**
+ * Runtime type guard: checks if a value is a valid Criterion.
+ */
+export function isCriterion(data: unknown): data is Criterion {
+  if (typeof data !== "object" || data === null) return false;
+  const c = data as Record<string, unknown>;
+  return (
+    typeof c.id === "string" &&
+    typeof c.name === "string" &&
+    typeof c.weight === "number" &&
+    c.weight >= 0 &&
+    (c.type === "benefit" || c.type === "cost")
+  );
+}
+
+/**
+ * Runtime type guard: checks if a value is a valid Decision.
+ */
+export function isDecision(data: unknown): data is Decision {
+  if (typeof data !== "object" || data === null) return false;
+  const d = data as Record<string, unknown>;
+  return (
+    typeof d.id === "string" &&
+    typeof d.title === "string" &&
+    Array.isArray(d.options) &&
+    d.options.every(isOption) &&
+    Array.isArray(d.criteria) &&
+    d.criteria.every(isCriterion) &&
+    typeof d.scores === "object" &&
+    d.scores !== null &&
+    typeof d.createdAt === "string" &&
+    typeof d.updatedAt === "string"
+  );
+}
+
+/**
+ * Runtime type guard: checks if a value is a valid Decision array.
+ */
+export function isDecisionArray(data: unknown): data is Decision[] {
+  return Array.isArray(data) && data.every(isDecision);
+}
+
+// ─── Field-Level Validators ────────────────────────────────────────
 
 /**
  * Validate an entire decision. Returns an array of errors (empty = valid).

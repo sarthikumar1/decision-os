@@ -5,7 +5,8 @@
 "use client";
 
 import { useDecision } from "./DecisionProvider";
-import { Plus, Trash2, Info } from "lucide-react";
+import { Plus, Trash2, Info, Clock } from "lucide-react";
+import { formatRelativeTime } from "@/lib/utils";
 import type { CriterionType } from "@/lib/types";
 
 export function DecisionBuilder() {
@@ -66,6 +67,31 @@ export function DecisionBuilder() {
               placeholder="Brief context about this decision..."
               maxLength={500}
             />
+          </div>
+          {/* Timestamps */}
+          <div className="flex flex-wrap gap-4 text-xs text-gray-500 dark:text-gray-400">
+            <span className="inline-flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              Created{" "}
+              <time
+                dateTime={decision.createdAt}
+                title={new Date(decision.createdAt).toLocaleString()}
+              >
+                {formatRelativeTime(decision.createdAt)}
+              </time>
+            </span>
+            {decision.updatedAt !== decision.createdAt && (
+              <span className="inline-flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                Updated{" "}
+                <time
+                  dateTime={decision.updatedAt}
+                  title={new Date(decision.updatedAt).toLocaleString()}
+                >
+                  {formatRelativeTime(decision.updatedAt)}
+                </time>
+              </span>
+            )}
           </div>
         </div>
       </section>
@@ -133,6 +159,9 @@ export function DecisionBuilder() {
             >
               Criteria
             </h2>
+            <span id="weight-range-desc" className="sr-only">
+              Enter a value between 0 and 100
+            </span>
             <div className="group relative">
               <Info className="h-4 w-4 text-gray-400 cursor-help" />
               <div className="absolute left-0 top-6 z-10 hidden group-hover:block w-64 rounded-md bg-gray-900 px-3 py-2 text-xs text-white shadow-lg">
@@ -189,6 +218,7 @@ export function DecisionBuilder() {
                   }
                   className="w-16 rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-2 text-sm text-center focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   aria-label={`Weight for ${crit.name}`}
+                  aria-describedby="weight-range-desc"
                 />
               </div>
               <select
@@ -225,6 +255,9 @@ export function DecisionBuilder() {
           Scores Matrix
           <span className="text-sm font-normal text-gray-500 ml-2">(0–10 per cell)</span>
         </h2>
+        <span id="score-range-desc" className="sr-only">
+          Enter a value between 0 and 10
+        </span>
         <div className="overflow-x-auto">
           <table className="min-w-full border-collapse" role="grid" aria-label="Scores matrix">
             <thead>
@@ -272,6 +305,7 @@ export function DecisionBuilder() {
                         }}
                         className="w-14 rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm text-center focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                         aria-label={`Score for ${opt.name} on ${crit.name}`}
+                        aria-describedby="score-range-desc"
                       />
                     </td>
                   ))}

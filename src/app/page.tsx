@@ -5,7 +5,8 @@
 
 "use client";
 
-import { useState, useEffect, useCallback, useSyncExternalStore } from "react";
+import { useState, useEffect, useCallback, useRef, useSyncExternalStore } from "react";
+import { AnnouncerProvider, useAnnounce } from "@/components/Announcer";
 import { DecisionProvider } from "@/components/DecisionProvider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Header } from "@/components/Header";
@@ -26,38 +27,129 @@ function useIsMounted() {
 
 type Tab = "builder" | "results" | "sensitivity";
 
+const tabLabels: Record<Tab, string> = {
+  builder: "Builder",
+  results: "Results",
+  sensitivity: "Sensitivity",
+};
+
+const TAB_IDS: Tab[] = ["builder", "results", "sensitivity"];
+
 function AppContent() {
   const [activeTab, setActiveTab] = useState<Tab>("builder");
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const shortcutTriggerRef = useRef<HTMLButtonElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const announce = useAnnounce();
 
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    // Ignore when typing in inputs
-    const tag = (e.target as HTMLElement)?.tagName;
-    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+  // Focus the active tab button after tab change via arrow keys
+  const activateTab = useCallback(
+    (tab: Tab) => {
+      setActiveTab(tab);
+      announce(`${tabLabels[tab]} tab`);
+      document.getElementById(`tab-${tab}`)?.focus();
+    },
+    [announce]
+  );
 
-    switch (e.key) {
-      case "1":
-        setActiveTab("builder");
-        break;
-      case "2":
-        setActiveTab("results");
-        break;
-      case "3":
-        setActiveTab("sensitivity");
-        break;
-      case "?":
-        setShowShortcuts((prev) => !prev);
-        break;
-      case "Escape":
-        setShowShortcuts(false);
-        break;
-    }
+  // Arrow key navigation within the tablist (WAI-ARIA Tabs Pattern)
+  const handleTabKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      const idx = TAB_IDS.indexOf(activeTab);
+      switch (e.key) {
+        case "ArrowRight":
+          e.preventDefault();
+          activateTab(TAB_IDS[(idx + 1) % TAB_IDS.length]);
+          break;
+        case "ArrowLeft":
+          e.preventDefault();
+          activateTab(TAB_IDS[(idx + TAB_IDS.length - 1) % TAB_IDS.length]);
+          break;
+        case "Home":
+          e.preventDefault();
+          activateTab(TAB_IDS[0]);
+          break;
+        case "End":
+          e.preventDefault();
+          activateTab(TAB_IDS[TAB_IDS.length - 1]);
+          break;
+      }
+    },
+    [activeTab, activateTab],
+  );
+
+  // Restore focus to trigger element when modal closes
+  const closeModal = useCallback(() => {
+    setShowShortcuts(false);
+    shortcutTriggerRef.current?.focus();
   }, []);
+
+  // Global keyboard shortcuts (1/2/3/?)
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      // Ignore when typing in inputs
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+
+      switch (e.key) {
+        case "1":
+          setActiveTab("builder");
+          announce("Builder tab");
+          break;
+        case "2":
+          setActiveTab("results");
+          announce("Results tab");
+          break;
+        case "3":
+          setActiveTab("sensitivity");
+          announce("Sensitivity tab");
+          break;
+        case "?":
+          setShowShortcuts((prev) => !prev);
+          break;
+        case "Escape":
+          closeModal();
+          break;
+      }
+    },
+    [closeModal, announce],
+  );
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
+
+  // Modal focus trap: move focus into modal on open, trap Tab, restore on close
+  useEffect(() => {
+    if (!showShortcuts) return;
+
+    // Focus the close button inside the modal
+    const modal = modalRef.current;
+    if (!modal) return;
+    const closeBtn = modal.querySelector<HTMLElement>("[data-modal-close]");
+    closeBtn?.focus();
+
+    const handleTrap = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      const focusable = modal.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleTrap);
+    return () => document.removeEventListener("keydown", handleTrap);
+  }, [showShortcuts]);
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: "builder", label: "Builder", icon: <Settings2 className="h-4 w-4" /> },
@@ -83,10 +175,13 @@ function AppContent() {
           {tabs.map((tab) => (
             <button
               key={tab.id}
+              id={`tab-${tab.id}`}
               role="tab"
               aria-selected={activeTab === tab.id}
               aria-controls={`panel-${tab.id}`}
+              tabIndex={activeTab === tab.id ? 0 : -1}
               onClick={() => setActiveTab(tab.id)}
+              onKeyDown={handleTabKeyDown}
               className={`inline-flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-t-md ${
                 activeTab === tab.id
                   ? "border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400"
@@ -100,6 +195,7 @@ function AppContent() {
 
           {/* Keyboard shortcut hint */}
           <button
+            ref={shortcutTriggerRef}
             onClick={() => setShowShortcuts(true)}
             className="ml-auto text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors hidden sm:inline-flex items-center gap-1"
             aria-label="Show keyboard shortcuts"
@@ -158,12 +254,13 @@ function AppContent() {
       {showShortcuts && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-          onClick={() => setShowShortcuts(false)}
+          onClick={closeModal}
           role="dialog"
           aria-modal="true"
           aria-label="Keyboard shortcuts"
         >
           <div
+            ref={modalRef}
             className="bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6 max-w-sm w-full mx-4"
             onClick={(e) => e.stopPropagation()}
           >
@@ -173,7 +270,8 @@ function AppContent() {
                 Keyboard Shortcuts
               </h2>
               <button
-                onClick={() => setShowShortcuts(false)}
+                data-modal-close
+                onClick={closeModal}
                 className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 aria-label="Close shortcuts"
               >
@@ -185,6 +283,8 @@ function AppContent() {
                 ["1", "Builder tab"],
                 ["2", "Results tab"],
                 ["3", "Sensitivity tab"],
+                ["←/→", "Navigate tabs"],
+                ["Home/End", "First/last tab"],
                 ["?", "Toggle this dialog"],
                 ["Esc", "Close dialog"],
               ].map(([key, desc]) => (
@@ -221,9 +321,11 @@ export default function Home() {
 
   return (
     <ErrorBoundary>
-      <DecisionProvider>
-        <AppContent />
-      </DecisionProvider>
+      <AnnouncerProvider>
+        <DecisionProvider>
+          <AppContent />
+        </DecisionProvider>
+      </AnnouncerProvider>
     </ErrorBoundary>
   );
 }

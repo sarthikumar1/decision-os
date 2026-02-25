@@ -8,6 +8,7 @@
 import type { Decision } from "./types";
 import { DEMO_DECISION } from "./demo-data";
 import { safeJsonParse } from "./utils";
+import { isDecisionArray } from "./validation";
 
 const STORAGE_KEY = "decision-os:decisions";
 
@@ -27,8 +28,14 @@ export function getDecisions(): Decision[] {
       return initial;
     }
 
-    const decisions = safeJsonParse<Decision[]>(raw, [DEMO_DECISION]);
-    return decisions.length === 0 ? [DEMO_DECISION] : decisions;
+    const parsed = safeJsonParse<unknown>(raw, null);
+    if (!isDecisionArray(parsed) || parsed.length === 0) {
+      console.warn("[DecisionOS] localStorage data invalid — resetting to demo");
+      const initial = [DEMO_DECISION];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
+      return initial;
+    }
+    return parsed;
   } catch {
     // localStorage unavailable (private browsing, quota exceeded, etc.)
     return [DEMO_DECISION];

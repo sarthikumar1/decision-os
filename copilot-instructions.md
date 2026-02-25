@@ -47,7 +47,8 @@ src/
 │   ├── SensitivityView.tsx   # Sensitivity analysis
 │   ├── ScoreChart.tsx        # Recharts visualization
 │   ├── ThemeProvider.tsx     # Dark/light mode context
-│   └── ErrorBoundary.tsx     # Error boundary with recovery UI
+│   ├── ErrorBoundary.tsx     # Error boundary with recovery UI
+│   └── Announcer.tsx         # Live-region announcer for screen readers
 ├── lib/              # Pure logic (no React)
 │   ├── types.ts      # TypeScript type definitions
 │   ├── scoring.ts    # Scoring engine (CRITICAL - see below)
@@ -94,6 +95,8 @@ Everything in `src/lib/` must be pure functions with no React dependencies. This
 - Use semantic HTML elements (`<nav>`, `<main>`, `<section>`, etc.)
 - Add `aria-label` to buttons without visible text
 - Use `role="tablist"`, `role="tab"`, `role="tabpanel"` for tab interfaces
+- Use `aria-describedby` on inputs that need range/format hints
+- Use `aria-live` regions (via `useAnnounce()`) for dynamic content changes
 
 ### 6. Styling conventions
 

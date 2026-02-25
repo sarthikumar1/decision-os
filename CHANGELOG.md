@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **ARIA tab-panel linkage**: Tab buttons now have proper `id` attributes matching `aria-labelledby` on panels; roving tabindex with arrow-key + Home/End navigation (#17)
+- **Modal focus trap**: Keyboard shortcuts modal traps Tab/Shift+Tab, focuses close button on open, restores focus on close (#17)
+- **Runtime schema validation**: Type guard functions (`isDecision`, `isOption`, `isCriterion`, `isDecisionArray`) replace unsafe `as T` casts on localStorage and URL decode (#21)
+- **Score clamping**: Score inputs clamped to 0–10 integer range in `updateScore` (#21)
 - **E2E assertion mismatch**: New decisions now use "Untitled Decision" matching E2E test expectations (#6)
 - **Shared URL restoration**: Visiting a share link now correctly restores the decision state (#5)
 - **localStorage safety**: All localStorage calls wrapped in try/catch for private browsing compatibility (#16)
@@ -21,6 +25,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **aria-describedby on inputs**: Score, weight, and sensitivity slider inputs now have screen-reader-visible range descriptions (#41)
+- **aria-live announcer**: `AnnouncerProvider` + `useAnnounce()` hook announces CRUD operations, tab switches, and auto-save to screen readers (#29)
+- **PWA web app manifest**: `manifest.ts` with app name, icons, standalone display mode, and theme color (#36)
+- **Decision timestamps**: Created/updated `<time>` elements with relative formatting (`formatRelativeTime`) in Decision Builder; `updatedAt` auto-set on every edit (#43)
+- **Print stylesheet**: Expanded `@media print` rules — all tab panels visible, nav/footer/buttons hidden, light palette forced, page-break-avoid on sections, link URLs shown (#24)
+- **Cross-browser E2E**: Playwright config now includes Chromium, Firefox, and WebKit projects; CI installs all three browsers (#37)
 - **HTTP security headers**: HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy (#20)
 - **CI format:check step**: Prettier formatting enforced in CI pipeline (#30)
 - **Dependabot config**: Automated dependency updates for npm and GitHub Actions (#32)

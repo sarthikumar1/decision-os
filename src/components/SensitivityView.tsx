@@ -44,6 +44,9 @@ export function SensitivityView() {
           >
             Weight swing:
           </label>
+          <span id="swing-range-desc" className="sr-only">
+            Adjust weight swing from 5% to 50%
+          </span>
           <input
             id="swing-percent"
             type="range"
@@ -54,6 +57,7 @@ export function SensitivityView() {
             onChange={(e) => setSwingPercent(Number(e.target.value))}
             className="w-32 accent-purple-600"
             aria-label="Swing percentage"
+            aria-describedby="swing-range-desc"
           />
           <span className="text-sm font-medium text-purple-700 dark:text-purple-400 min-w-[3rem]">
             ±{swingPercent}%

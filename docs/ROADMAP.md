@@ -19,7 +19,7 @@
 - [x] Dark mode (full dark theme with FOUC prevention)
 - [x] Charts (Recharts bar + stacked breakdown)
 - [x] URL sharing (lz-string compression with base64 fallback)
-- [x] Keyboard shortcuts (1/2/3 tabs, ? help)
+- [x] Keyboard shortcuts (1/2/3 tabs, ? help, arrow-key tabs, Home/End)
 - [x] PDF export (via window.print)
 - [x] Error boundary with recovery UI
 - [x] Security headers (HSTS, X-Frame-Options, CSP, etc.)
@@ -27,6 +27,14 @@
 - [x] Coverage thresholds in CI
 - [x] Dependabot + CODEOWNERS
 - [x] robots.txt + sitemap.xml
+- [x] ARIA tab-panel linkage + roving tabindex + modal focus trap
+- [x] Runtime schema validation (type guards for localStorage & URL decode)
+- [x] aria-describedby on score, weight, and sensitivity inputs
+- [x] aria-live announcer for CRUD operations and tab switches
+- [x] PWA web app manifest
+- [x] Decision timestamps (created/updated) with relative time display
+- [x] Print stylesheet (all panels visible, clean layout)
+- [x] Cross-browser E2E testing (Chromium + Firefox + WebKit)
 - [ ] Drag-and-drop reordering for options/criteria
 - [ ] Decision templates (career, purchase, hiring, etc.)
 - [ ] Undo/redo support
@@ -52,7 +60,6 @@
 ## v1.0.0 — Production Ready
 
 - [ ] Performance optimization for large decisions (50+ options)
-- [ ] PWA support (offline mode)
 - [ ] i18n (internationalization)
 - [ ] Comprehensive e2e test suite
 - [ ] Security audit
