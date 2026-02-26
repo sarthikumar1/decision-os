@@ -14,6 +14,7 @@ import { DecisionBuilder } from "@/components/DecisionBuilder";
 import { ResultsView } from "@/components/ResultsView";
 import { SensitivityView } from "@/components/SensitivityView";
 import { CompareView } from "@/components/CompareView";
+import { MonteCarloView } from "@/components/MonteCarloView";
 import { DecisionSkeleton } from "@/components/DecisionSkeleton";
 import { ImportModal } from "@/components/ImportModal";
 import { useValidation } from "@/hooks/useValidation";
@@ -22,6 +23,7 @@ import {
   BarChart3,
   Activity,
   GitCompareArrows,
+  Dices,
   Keyboard,
   X,
   Upload,
@@ -40,16 +42,17 @@ function useIsMounted() {
   );
 }
 
-type Tab = "builder" | "results" | "sensitivity" | "compare";
+type Tab = "builder" | "results" | "sensitivity" | "compare" | "montecarlo";
 
 const tabLabels: Record<Tab, string> = {
   builder: "Builder",
   results: "Results",
   sensitivity: "Sensitivity",
   compare: "Compare",
+  montecarlo: "Monte Carlo",
 };
 
-const TAB_IDS: Tab[] = ["builder", "results", "sensitivity", "compare"];
+const TAB_IDS: Tab[] = ["builder", "results", "sensitivity", "compare", "montecarlo"];
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState<Tab>("builder");
@@ -216,6 +219,10 @@ function AppContent() {
           setActiveTab("compare");
           announce("Compare tab");
           break;
+        case "5":
+          setActiveTab("montecarlo");
+          announce("Monte Carlo tab");
+          break;
         case "?":
           setShowShortcuts((prev) => !prev);
           break;
@@ -276,6 +283,11 @@ function AppContent() {
       label: "Compare",
       icon: <GitCompareArrows className="h-4 w-4" />,
     },
+    {
+      id: "montecarlo",
+      label: "Monte Carlo",
+      icon: <Dices className="h-4 w-4" />,
+    },
   ];
 
   return (
@@ -284,36 +296,34 @@ function AppContent() {
 
       <main id="main-content" className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-6">
         {/* Tabs */}
-        <nav
-          className="flex border-b border-gray-200 dark:border-gray-700 mb-6"
-          role="tablist"
-          aria-label="Decision sections"
-        >
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              id={`tab-${tab.id}`}
-              role="tab"
-              aria-selected={activeTab === tab.id}
-              aria-controls={`panel-${tab.id}`}
-              tabIndex={activeTab === tab.id ? 0 : -1}
-              onClick={() => setActiveTab(tab.id)}
-              onKeyDown={handleTabKeyDown}
-              className={`inline-flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-t-md ${
-                activeTab === tab.id
-                  ? "border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200"
-              }`}
-            >
-              {tab.icon}
-              {tab.label}
-              {tab.id === "builder" && validation.errorCount > 0 && (
-                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white px-1">
-                  {validation.errorCount}
-                </span>
-              )}
-            </button>
-          ))}
+        <div className="flex border-b border-gray-200 dark:border-gray-700 mb-6">
+          <nav role="tablist" aria-label="Decision sections" className="flex">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                id={`tab-${tab.id}`}
+                role="tab"
+                aria-selected={activeTab === tab.id}
+                aria-controls={`panel-${tab.id}`}
+                tabIndex={activeTab === tab.id ? 0 : -1}
+                onClick={() => setActiveTab(tab.id)}
+                onKeyDown={handleTabKeyDown}
+                className={`inline-flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-t-md ${
+                  activeTab === tab.id
+                    ? "border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200"
+                }`}
+              >
+                {tab.icon}
+                {tab.label}
+                {tab.id === "builder" && validation.errorCount > 0 && (
+                  <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white px-1">
+                    {validation.errorCount}
+                  </span>
+                )}
+              </button>
+            ))}
+          </nav>
 
           {/* Keyboard shortcut hint */}
           <button
@@ -327,7 +337,7 @@ function AppContent() {
               ?
             </kbd>
           </button>
-        </nav>
+        </div>
 
         {/* Tab Panels */}
         <div
@@ -362,6 +372,14 @@ function AppContent() {
         >
           <CompareView />
         </div>
+        <div
+          id="panel-montecarlo"
+          role="tabpanel"
+          aria-labelledby="tab-montecarlo"
+          className={activeTab === "montecarlo" ? "" : "hidden"}
+        >
+          <MonteCarloView />
+        </div>
       </main>
 
       {/* Footer */}
@@ -370,7 +388,7 @@ function AppContent() {
           Decision OS v{pkg.version} — Open source structured decision-making tool.{" "}
           <a
             href="https://github.com/ericsocrat/decision-os"
-            className="text-blue-600 hover:underline dark:text-blue-400"
+            className="text-blue-600 underline hover:no-underline dark:text-blue-400"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -414,6 +432,7 @@ function AppContent() {
                 ["2", "Results tab"],
                 ["3", "Sensitivity tab"],
                 ["4", "Compare tab"],
+                ["5", "Monte Carlo tab"],
                 ["←/→", "Navigate tabs"],
                 ["Home/End", "First/last tab"],
                 ["Ctrl+Z", "Undo"],
