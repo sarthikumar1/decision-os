@@ -72,7 +72,7 @@ Open [http://localhost:3000](http://localhost:3000) — a demo decision is prelo
 | ✅     | **Charts**                    | Recharts-powered bar and breakdown charts                |
 | ✅     | **Cloud Sync**                | Bidirectional Supabase sync with auth                    |
 | ✅     | **Accessible**                | Keyboard navigable, ARIA labels, screen reader support   |
-| ✅     | **1,375 Tests**               | Comprehensive unit + E2E + a11y test suite               |
+| ✅     | **1,383 Tests**               | Comprehensive unit + E2E + a11y test suite               |
 
 ## Scoring Model
 

@@ -47,9 +47,9 @@
 - [x] JSON/CSV import with preview and drag-and-drop
 - [x] Production error telemetry (localStorage diagnostics, Sentry-ready)
 - [x] Visual regression testing (Playwright screenshots, 7 visual tests)
-- [ ] Drag-and-drop reordering for options/criteria
-- [ ] Mobile-optimized score matrix (swipe or accordion)
-- [ ] Tooltips for criterion descriptions
+- [x] Drag-and-drop reordering for options/criteria (@dnd-kit, keyboard-navigable)
+- [x] Mobile-optimized score matrix (MobileScoreCards component)
+- [x] Tooltips for criterion descriptions (CriterionTooltip, accessible)
 
 ## v0.3.0 — Persistence & Sharing
 
@@ -66,15 +66,15 @@
 ## v0.4.0 — Advanced Analysis
 
 - [x] Monte Carlo sensitivity analysis
-- [ ] "What-if" scenarios (compare two weight configurations)
-- [ ] Decision journal (track outcomes over time)
-- [ ] PDF export
+- [x] "What-if" scenarios (WhatIfPanel — compare weight configurations)
+- [x] Decision journal (journal.ts — track entries over time)
+- [x] PDF export (window.print with print stylesheet)
 - [x] Comparison mode (side-by-side decisions)
 
 ## v1.0.0 — Production Ready
 
 - [ ] Performance optimization for large decisions (50+ options)
-- [ ] i18n (internationalization)
+- [x] i18n (internationalization — en/fr/es)
 - [ ] Comprehensive e2e test suite
 - [ ] Security audit
 - [ ] Accessibility audit (WCAG 2.1 AA)
